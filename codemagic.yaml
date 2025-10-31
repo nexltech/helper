@@ -1,0 +1,51 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - app_store_credentials
+      vars:
+        APP_ID: com.Helpr
+        BUNDLE_ID: "com.Helpr"
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        FLUTTER_BUILD_MODE: "release"
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter pub get
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod repo update && pod install
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Build IPA
+        script: |
+          flutter build ipa \
+            --release \
+            --export-options-plist=ios/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - muhammadzahid.alimalik@gmail.com
+        notify:
+          success: true
+          failure: false
+      app_store_connect:
+        auth: integration
+        
+        # Optional: Submit to TestFlight automatically
+        # submit_to_testflight: true
+        # Optional: Submit to App Store automatically  
+        # submit_to_app_store: false
+
