@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:job/Screen/Auth/auth_gate_screen.dart';
 import 'providers/user_provider.dart';
@@ -9,20 +12,101 @@ import 'providers/my_applications_provider.dart';
 import 'providers/profile_crud_provider.dart';
 import 'providers/chat_provider.dart';
 import 'providers/review_provider.dart';
+import 'services/stripe_service.dart';
+// Uncomment when Firebase Crashlytics is configured:
+// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// import 'package:firebase_core/firebase_core.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize user provider and load session
-  final userProvider = UserProvider();
-  try {
-    await userProvider.loadSession();
-  } catch (e) {
-    // If session loading fails, continue with empty provider
-    // Error is already logged in UserProvider
-  }
-  
-  runApp(MyApp(userProvider: userProvider));
+void main() {
+  // Run app in error-handled zone
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    // Set up global error handlers (before Firebase initialization)
+    _setupErrorHandlers();
+    
+    // Initialize Firebase (uncomment when configured)
+    // await Firebase.initializeApp();
+    // Pass all uncaught errors to Crashlytics
+    // FlutterError.onError = (errorDetails) {
+    //   FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    // };
+    // Pass all uncaught "fatal" errors from the platform to Crashlytics
+    // PlatformDispatcher.instance.onError = (error, stack) {
+    //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    //   return true;
+    // };
+    
+    // Initialize Stripe to prevent crashes when payment screens open
+    try {
+      await StripeService.instance.initializeStripe();
+      if (kDebugMode) {
+        print('Stripe initialized successfully');
+      }
+    } catch (e, stackTrace) {
+      // Log error but don't crash app if Stripe fails
+      if (kDebugMode) {
+        print('Stripe initialization failed: $e');
+      }
+      // Uncomment when Crashlytics is configured:
+      // FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+    }
+    
+    // Initialize user provider and load session
+    final userProvider = UserProvider();
+    try {
+      await userProvider.loadSession();
+    } catch (e, stackTrace) {
+      // If session loading fails, continue with empty provider
+      if (kDebugMode) {
+        print('Session loading failed: $e');
+      }
+      // Uncomment when Crashlytics is configured:
+      // FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+    }
+    
+    runApp(MyApp(userProvider: userProvider));
+  }, (error, stack) {
+    // Catch any errors not handled by FlutterError.onError
+    if (kDebugMode) {
+      print('Unhandled error in zone: $error\n$stack');
+    } else {
+      // Uncomment when Crashlytics is configured:
+      // FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      print('Unhandled error: $error');
+    }
+  });
+}
+
+/// Set up global error handlers to catch unhandled exceptions
+void _setupErrorHandlers() {
+  // Handle Flutter framework errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    // Log to console in debug mode
+    if (kDebugMode) {
+      FlutterError.presentError(details);
+    } else {
+      // In release mode, send to crash reporting service
+      // Uncomment when Crashlytics is configured:
+      // FirebaseCrashlytics.instance.recordFlutterError(details);
+      // For now, log to console
+      print('Flutter Error: ${details.exception}\n${details.stack}');
+    }
+  };
+
+  // Handle async errors (Zones)
+  PlatformDispatcher.instance.onError = (error, stack) {
+    // Log error
+    if (kDebugMode) {
+      print('Unhandled async error: $error\n$stack');
+    } else {
+      // In release mode, send to crash reporting service
+      // Uncomment when Crashlytics is configured:
+      // FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      print('Unhandled async error: $error');
+    }
+    return true; // Prevent app from crashing immediately
+  };
 }
 
 class MyApp extends StatelessWidget {
