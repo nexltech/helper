@@ -301,15 +301,36 @@ flutter build ios --release
 
 ---
 
-## 📊 What to Expect After Deployment
+## 📊 What to Expect After Deployment to TestFlight
 
-Once deployed to TestFlight:
+Once deployed to TestFlight, Crashlytics will automatically capture and report all crashes:
 
-1. **Crash reports will appear** in Firebase Console within 1-5 minutes of crashes occurring
-2. **Stack traces** will show exactly where crashes happen
-3. **Device information** will show which devices are affected
-4. **User impact** numbers will show how many users are affected
-5. **Non-fatal errors** will also be tracked (Stripe failures, session errors, etc.)
+1. **✅ Crash reports will appear** in Firebase Console within 1-5 minutes of crashes occurring
+2. **✅ Stack traces** will show exactly where crashes happen in your code
+3. **✅ Device information** will show which devices are affected (iPhone model, iOS version)
+4. **✅ User impact** numbers will show how many TestFlight users are affected
+5. **✅ Non-fatal errors** will also be tracked (Stripe failures, session errors, etc.)
+6. **✅ App version** will show which build version had the crash (1.0.2+5, etc.)
+7. **✅ Timeline** will show when crashes occurred
+8. **✅ Custom logs** - Any logs you add will appear with crashes
+
+### How to View Crash Reports:
+
+1. Go to https://console.firebase.google.com
+2. Select your project: **helper-b63c2**
+3. Click **Crashlytics** in the left menu
+4. You'll see:
+   - **Issues** - All unique crash types
+   - **Users affected** - How many TestFlight users experienced each crash
+   - **Latest crashes** - Most recent crashes
+   - **Trends** - Crash frequency over time
+
+### Important Notes:
+
+- ⏱️ **Reports appear within 1-5 minutes** after a crash occurs
+- 📱 **Works with all TestFlight builds** - Release builds automatically send crash reports
+- 🔍 **Detailed stack traces** - You'll see exactly which file and line number caused the crash
+- 📊 **Real-time monitoring** - Check Firebase Console regularly to track app stability
 
 ---
 

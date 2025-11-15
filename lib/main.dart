@@ -21,10 +21,22 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
     
     // Initialize Firebase first (required before Crashlytics)
-    await Firebase.initializeApp();
-    
-    // Set up global error handlers (after Firebase initialization)
-    _setupErrorHandlers();
+    // Wrap in try-catch to prevent crash if Firebase initialization fails
+    try {
+      await Firebase.initializeApp();
+      // Set up global error handlers (after Firebase initialization)
+      _setupErrorHandlers();
+    } catch (e, stackTrace) {
+      // If Firebase initialization fails, log error but continue
+      // This prevents app crash on startup if GoogleService-Info.plist is missing or invalid
+      if (kDebugMode) {
+        print('Firebase initialization failed: $e');
+        print('Stack trace: $stackTrace');
+      }
+      // Continue without Crashlytics - app will still work but crashes won't be reported
+      // Set up basic error handlers that don't use Crashlytics
+      _setupBasicErrorHandlers();
+    }
     
     // Initialize Stripe to prevent crashes when payment screens open
     try {
@@ -37,8 +49,12 @@ void main() {
       if (kDebugMode) {
         print('Stripe initialization failed: $e');
       }
-      // Record non-fatal error to Crashlytics
-      FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+      // Record non-fatal error to Crashlytics (if available)
+      try {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+      } catch (_) {
+        // Crashlytics not available, skip
+      }
     }
     
     // Initialize user provider and load session
@@ -50,8 +66,12 @@ void main() {
       if (kDebugMode) {
         print('Session loading failed: $e');
       }
-      // Record non-fatal error to Crashlytics
-      FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+      // Record non-fatal error to Crashlytics (if available)
+      try {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+      } catch (_) {
+        // Crashlytics not available, skip
+      }
     }
     
     runApp(MyApp(userProvider: userProvider));
@@ -60,12 +80,16 @@ void main() {
     if (kDebugMode) {
       print('Unhandled error in zone: $error\n$stack');
     }
-    // Record fatal error to Crashlytics
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    // Record fatal error to Crashlytics (if available)
+    try {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    } catch (_) {
+      // Crashlytics not available, app will still run
+    }
   });
 }
 
-/// Set up global error handlers to catch unhandled exceptions
+/// Set up global error handlers to catch unhandled exceptions (with Crashlytics)
 void _setupErrorHandlers() {
   // Handle Flutter framework errors
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -74,7 +98,14 @@ void _setupErrorHandlers() {
       FlutterError.presentError(details);
     }
     // Always send to Crashlytics (works in both debug and release, but only reports in release)
-    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    try {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    } catch (e) {
+      // If Crashlytics fails, log to console as fallback
+      if (kDebugMode) {
+        print('Failed to record error to Crashlytics: $e');
+      }
+    }
   };
 
   // Handle async errors (Zones)
@@ -84,7 +115,35 @@ void _setupErrorHandlers() {
       print('Unhandled async error: $error\n$stack');
     }
     // Always send to Crashlytics (works in both debug and release, but only reports in release)
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    try {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    } catch (e) {
+      // If Crashlytics fails, log to console as fallback
+      if (kDebugMode) {
+        print('Failed to record error to Crashlytics: $e');
+      }
+    }
+    return true; // Prevent app from crashing immediately
+  };
+}
+
+/// Set up basic error handlers when Firebase is not available
+void _setupBasicErrorHandlers() {
+  // Handle Flutter framework errors (without Crashlytics)
+  FlutterError.onError = (FlutterErrorDetails details) {
+    // Log to console in debug mode
+    if (kDebugMode) {
+      FlutterError.presentError(details);
+    }
+    // In release mode, errors won't be reported but app won't crash
+  };
+
+  // Handle async errors (Zones) - without Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    // Log error in debug mode
+    if (kDebugMode) {
+      print('Unhandled async error: $error\n$stack');
+    }
     return true; // Prevent app from crashing immediately
   };
 }
