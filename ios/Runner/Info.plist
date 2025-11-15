@@ -49,5 +49,22 @@
 <string>We need access to your camera to take photos and upload them to your profile.</string>
 <key>NSPhotoLibraryUsageDescription</key>
 <string>We need access to your photo library to select images for your profile or posts.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>We need permission to save photos to your photo library.</string>
+<key>NSAppTransportSecurity</key>
+<dict>
+	<key>NSAllowsArbitraryLoads</key>
+	<false/>
+	<key>NSExceptionDomains</key>
+	<dict>
+		<key>helper.nexltech.com</key>
+		<dict>
+			<key>NSExceptionAllowsInsecureHTTPLoads</key>
+			<true/>
+			<key>NSIncludesSubdomains</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
 </dict>
 </plist>

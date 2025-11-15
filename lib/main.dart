@@ -10,24 +10,31 @@ import 'providers/profile_crud_provider.dart';
 import 'providers/chat_provider.dart';
 import 'providers/review_provider.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize user provider and load session
+  final userProvider = UserProvider();
+  try {
+    await userProvider.loadSession();
+  } catch (e) {
+    // If session loading fails, continue with empty provider
+    // Error is already logged in UserProvider
+  }
+  
+  runApp(MyApp(userProvider: userProvider));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final UserProvider userProvider;
+  const MyApp({super.key, required this.userProvider});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) {
-            final userProvider = UserProvider();
-            // Load session on app start
-            userProvider.loadSession();
-            return userProvider;
-          },
+        ChangeNotifierProvider.value(
+          value: userProvider,
         ),
         ChangeNotifierProvider(
           create: (context) => AdminProvider(),

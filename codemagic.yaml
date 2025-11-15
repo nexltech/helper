@@ -16,12 +16,34 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
+      - name: Clean Flutter build
+        script: |
+          flutter clean
       - name: Get Flutter dependencies
         script: |
           flutter pub get
+          if [ $? -ne 0 ]; then
+            echo "ERROR: flutter pub get failed"
+            exit 1
+          fi
+      - name: Verify critical files
+        script: |
+          test -f ios/Podfile || (echo "ERROR: Podfile missing" && exit 1)
+          test -f ios/Runner/Info.plist || (echo "ERROR: Info.plist missing" && exit 1)
+          test -d assets/Fonts || (echo "ERROR: Fonts directory missing" && exit 1)
       - name: Install CocoaPods dependencies
         script: |
-          cd ios && pod repo update && pod install
+          cd ios
+          if [ ! -f Podfile ]; then
+            echo "ERROR: Podfile not found!"
+            exit 1
+          fi
+          pod repo update
+          pod install
+          if [ $? -ne 0 ]; then
+            echo "ERROR: pod install failed"
+            exit 1
+          fi
       - name: Set up code signing settings on Xcode project
         script: |
           xcode-project use-profiles

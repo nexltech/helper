@@ -98,13 +98,13 @@ flutter:
   fonts:
     - family: FrederickaTheGreat
       fonts:
-        - asset: assets/fonts/FrederickatheGreat-Regular.ttf
+        - asset: assets/Fonts/FrederickatheGreat-Regular.ttf
     - family: HomemadeApple
       fonts:
-        - asset: assets/fonts/HomemadeApple-Regular.ttf
+        - asset: assets/Fonts/HomemadeApple-Regular.ttf
     - family: LifeSavers
       fonts:
-        - asset: assets/fonts/LifeSavers-Regular.ttf
+        - asset: assets/Fonts/LifeSavers-Regular.ttf
     - family: BioRhyme
       fonts:
-        - asset: assets/fonts/BioRhyme-VariableFont_wdth,wght.ttf
+        - asset: assets/Fonts/BioRhyme-VariableFont_wdth,wght.ttf
