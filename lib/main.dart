@@ -20,10 +20,13 @@ void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
     
-    // Initialize Firebase first (required before Crashlytics)
-    // Wrap in try-catch to prevent crash if Firebase initialization fails
+    // Initialize Firebase (if not already initialized by AppDelegate)
+    // Check if Firebase is already initialized to avoid double initialization
+    bool firebaseInitialized = false;
     try {
+      // If Firebase was already configured in AppDelegate, this will return the existing app
       await Firebase.initializeApp();
+      firebaseInitialized = true;
       // Set up global error handlers (after Firebase initialization)
       _setupErrorHandlers();
     } catch (e, stackTrace) {
@@ -35,6 +38,7 @@ void main() {
       }
       // Continue without Crashlytics - app will still work but crashes won't be reported
       // Set up basic error handlers that don't use Crashlytics
+      firebaseInitialized = false;
       _setupBasicErrorHandlers();
     }
     
@@ -50,10 +54,12 @@ void main() {
         print('Stripe initialization failed: $e');
       }
       // Record non-fatal error to Crashlytics (if available)
-      try {
-        FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
-      } catch (_) {
-        // Crashlytics not available, skip
+      if (firebaseInitialized) {
+        try {
+          FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+        } catch (_) {
+          // Crashlytics not available, skip
+        }
       }
     }
     
@@ -67,10 +73,12 @@ void main() {
         print('Session loading failed: $e');
       }
       // Record non-fatal error to Crashlytics (if available)
-      try {
-        FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
-      } catch (_) {
-        // Crashlytics not available, skip
+      if (firebaseInitialized) {
+        try {
+          FirebaseCrashlytics.instance.recordError(e, stackTrace, fatal: false);
+        } catch (_) {
+          // Crashlytics not available, skip
+        }
       }
     }
     
@@ -81,6 +89,8 @@ void main() {
       print('Unhandled error in zone: $error\n$stack');
     }
     // Record fatal error to Crashlytics (if available)
+    // Note: We can't check firebaseInitialized here since it's in a different scope
+    // The try-catch will handle if Crashlytics is not available
     try {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     } catch (_) {
