@@ -7,8 +7,8 @@ workflows:
       groups:
         - app_store_credentials
       vars:
-        APP_ID: com.Helpr
-        BUNDLE_ID: "com.Helpr"
+        APP_ID: com.Helper
+        BUNDLE_ID: "com.Helper"
         XCODE_WORKSPACE: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         FLUTTER_BUILD_MODE: "release"
@@ -57,10 +57,10 @@ workflows:
         # Use the Codemagic build counter for FLUTTER_BUILD_NUMBER (Bundle Version)
         # This fixes the App Store Connect duplicate build number error.
         
-        # NOTE: Version 1.0.0 with comprehensive Crashlytics logging
+        # NOTE: Version 1.0.1 with bundle ID fix and Crashlytics diagnostics
         flutter build ipa \
           --release \
-          --build-name=1.0.0 \
+          --build-name=1.0.1 \
           --build-number=$PROJECT_BUILD_NUMBER \
           --export-options-plist=ios/export_options.plist
     artifacts:
