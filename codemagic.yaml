@@ -57,7 +57,7 @@ workflows:
         # Use the Codemagic build counter for FLUTTER_BUILD_NUMBER (Bundle Version)
         # This fixes the App Store Connect duplicate build number error.
         
-        # NOTE: Version 1.0.3 with comprehensive Firebase verification and testing
+        # NOTE: Version 1.0.3 with bundle ID fix (com.Helpr → com.Helper)
         flutter build ipa \
           --release \
           --build-name=1.0.3 \
