@@ -156,3 +156,4 @@ flutter run
 
 **Summary:** You only need to place ONE file (`assets/icon/icon.png`), then run the command. All other icons will be automatically generated and placed in the correct locations! 🎉
 
+

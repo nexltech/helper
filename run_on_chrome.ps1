@@ -65,3 +65,4 @@ Write-Host "`nStarting app on Chrome..." -ForegroundColor Green
 Write-Host "This may take a minute on first run..." -ForegroundColor Yellow
 & $flutterPath run -d chrome
 
+
