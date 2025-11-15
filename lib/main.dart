@@ -283,7 +283,7 @@ void _testCrashlyticsConnection() {
     
     // Get app version - update this to match pubspec.yaml
     final appVersion = '1.0.3';
-    final buildNumber = '10';
+    final buildNumber = '11';
     
     // Set custom keys for debugging
     FirebaseCrashlytics.instance.setCustomKey('app_version', appVersion);
