@@ -50,6 +50,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -64,6 +65,7 @@ flutter:
 
   assets:
     - assets/Icons/
+    - assets/icon/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -108,3 +110,14 @@ flutter:
     - family: BioRhyme
       fonts:
         - asset: assets/Fonts/BioRhyme-VariableFont_wdth,wght.ttf
+
+# Flutter Launcher Icons Configuration
+# Run: flutter pub run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"  # Create this 1024x1024 image with your "H" logo
+  min_sdk_android: 21
+  adaptive_icon_background: "#ffffff"  # White background
+  adaptive_icon_foreground: "assets/icon/icon.png"  # Your "H" logo
+  remove_alpha_ios: true
