@@ -188,11 +188,27 @@ void _logToCrashlytics(String message, {bool isError = false, bool? firebaseInit
 /// This helps verify Crashlytics is properly configured
 void _testCrashlyticsConnection() {
   try {
+    // Verify Firebase is actually initialized
+    final apps = Firebase.apps;
+    if (apps.isEmpty) {
+      if (kDebugMode) {
+        print('ERROR: Firebase.apps is empty - Firebase not initialized!');
+        print('ERROR: Check bundle ID match between app and GoogleService-Info.plist');
+      }
+      return;
+    }
+    
+    if (kDebugMode) {
+      print('INFO: Firebase.apps count: ${apps.length}');
+      print('INFO: Default Firebase app name: ${Firebase.app().name}');
+    }
+    
     // Send a test log to verify Crashlytics is working
     FirebaseCrashlytics.instance.log('Crashlytics test: App initialized successfully');
-    FirebaseCrashlytics.instance.setCustomKey('app_version', '1.0.4');
-    FirebaseCrashlytics.instance.setCustomKey('build_number', '7');
+    FirebaseCrashlytics.instance.setCustomKey('app_version', '1.0.1');
+    FirebaseCrashlytics.instance.setCustomKey('build_number', '9');
     FirebaseCrashlytics.instance.setCustomKey('platform', 'iOS');
+    FirebaseCrashlytics.instance.setCustomKey('test_type', 'startup_verification');
     
     // Send a test non-fatal error to verify reporting works
     // This will appear in Firebase Console as a non-fatal error
@@ -204,11 +220,14 @@ void _testCrashlyticsConnection() {
     );
     
     if (kDebugMode) {
-      print('Crashlytics test error sent - check Firebase Console in 1-5 minutes');
+      print('SUCCESS: Crashlytics test error sent - check Firebase Console in 1-5 minutes');
+      print('INFO: If you don\'t see this in Firebase Console, check bundle ID match');
     }
-  } catch (e) {
+  } catch (e, stackTrace) {
     if (kDebugMode) {
-      print('Crashlytics test failed: $e');
+      print('ERROR: Crashlytics test failed: $e');
+      print('ERROR: Stack trace: $stackTrace');
+      print('ERROR: This means Crashlytics is not working properly');
     }
   }
 }
