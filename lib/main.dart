@@ -109,9 +109,21 @@ void main() {
         
         _logToCrashlytics('App startup: Running app', firebaseInitialized: firebaseInitialized);
         
-        // Test Crashlytics connectivity (only in debug mode or first launch)
+        // ALWAYS test Crashlytics connectivity (not just debug mode)
+        // This ensures we verify Firebase is working in release builds
         if (firebaseInitialized) {
+          // Run comprehensive Firebase verification and test
           _testCrashlyticsConnection();
+          
+          // Also verify Firebase status and log it
+          final status = _verifyFirebaseStatus();
+          if (status['initialized'] == true && status['crashlytics_available'] == true) {
+            _logToCrashlytics('App startup: Firebase and Crashlytics verified and ready', firebaseInitialized: true);
+          } else {
+            _logToCrashlytics('App startup: Firebase verification failed - ${status['error']}', isError: true, firebaseInitialized: false);
+          }
+        } else {
+          _logToCrashlytics('App startup: Firebase not initialized - Crashlytics will not work', isError: true, firebaseInitialized: false);
         }
         
         runApp(MyApp(userProvider: userProvider));
@@ -184,50 +196,147 @@ void _logToCrashlytics(String message, {bool isError = false, bool? firebaseInit
   }
 }
 
-/// Test Crashlytics connection by sending a test log
+/// Verify Firebase is properly initialized
+/// Returns detailed status information
+Map<String, dynamic> _verifyFirebaseStatus() {
+  final status = <String, dynamic>{
+    'initialized': false,
+    'app_count': 0,
+    'app_name': 'none',
+    'crashlytics_available': false,
+    'error': null,
+  };
+  
+  try {
+    // Check if Firebase is initialized
+    final apps = Firebase.apps;
+    status['app_count'] = apps.length;
+    
+    if (apps.isEmpty) {
+      status['error'] = 'Firebase.apps is empty - Firebase not initialized!';
+      if (kDebugMode) {
+        print('FIREBASE VERIFICATION: ❌ FAILED');
+        print('FIREBASE VERIFICATION: ${status['error']}');
+        print('FIREBASE VERIFICATION: Check bundle ID match between app and GoogleService-Info.plist');
+      }
+      return status;
+    }
+    
+    // Get default Firebase app
+    final app = Firebase.app();
+    status['app_name'] = app.name;
+    status['initialized'] = true;
+    
+    // Check if Crashlytics is available
+    try {
+      FirebaseCrashlytics.instance.log('Firebase verification: Crashlytics is available');
+      status['crashlytics_available'] = true;
+    } catch (e) {
+      status['crashlytics_available'] = false;
+      status['error'] = 'Crashlytics not available: $e';
+    }
+    
+    if (kDebugMode) {
+      print('FIREBASE VERIFICATION: ✅ SUCCESS');
+      print('FIREBASE VERIFICATION: App count: ${status['app_count']}');
+      print('FIREBASE VERIFICATION: App name: ${status['app_name']}');
+      print('FIREBASE VERIFICATION: Crashlytics available: ${status['crashlytics_available']}');
+    }
+  } catch (e, stackTrace) {
+    status['error'] = 'Firebase verification failed: $e';
+    if (kDebugMode) {
+      print('FIREBASE VERIFICATION: ❌ ERROR');
+      print('FIREBASE VERIFICATION: ${status['error']}');
+      print('FIREBASE VERIFICATION: Stack trace: $stackTrace');
+    }
+  }
+  
+  return status;
+}
+
+/// Test Crashlytics connection by sending test logs and errors
 /// This helps verify Crashlytics is properly configured
 void _testCrashlyticsConnection() {
   try {
-    // Verify Firebase is actually initialized
-    final apps = Firebase.apps;
-    if (apps.isEmpty) {
+    // First verify Firebase is initialized
+    final status = _verifyFirebaseStatus();
+    
+    if (!status['initialized'] as bool) {
       if (kDebugMode) {
-        print('ERROR: Firebase.apps is empty - Firebase not initialized!');
-        print('ERROR: Check bundle ID match between app and GoogleService-Info.plist');
+        print('CRASHLYTICS TEST: ❌ SKIPPED - Firebase not initialized');
+        print('CRASHLYTICS TEST: ${status['error']}');
+      }
+      return;
+    }
+    
+    if (!status['crashlytics_available'] as bool) {
+      if (kDebugMode) {
+        print('CRASHLYTICS TEST: ❌ SKIPPED - Crashlytics not available');
+        print('CRASHLYTICS TEST: ${status['error']}');
       }
       return;
     }
     
     if (kDebugMode) {
-      print('INFO: Firebase.apps count: ${apps.length}');
-      print('INFO: Default Firebase app name: ${Firebase.app().name}');
+      print('CRASHLYTICS TEST: ✅ Starting comprehensive test...');
     }
     
-    // Send a test log to verify Crashlytics is working
-    FirebaseCrashlytics.instance.log('Crashlytics test: App initialized successfully');
-    FirebaseCrashlytics.instance.setCustomKey('app_version', '1.0.1');
-    FirebaseCrashlytics.instance.setCustomKey('build_number', '9');
+    // Get app version - update this to match pubspec.yaml
+    final appVersion = '1.0.3';
+    final buildNumber = '10';
+    
+    // Set custom keys for debugging
+    FirebaseCrashlytics.instance.setCustomKey('app_version', appVersion);
+    FirebaseCrashlytics.instance.setCustomKey('build_number', buildNumber);
     FirebaseCrashlytics.instance.setCustomKey('platform', 'iOS');
-    FirebaseCrashlytics.instance.setCustomKey('test_type', 'startup_verification');
+    FirebaseCrashlytics.instance.setCustomKey('test_type', 'comprehensive_startup_test');
+    FirebaseCrashlytics.instance.setCustomKey('firebase_app_name', status['app_name'] as String);
+    FirebaseCrashlytics.instance.setCustomKey('test_timestamp', DateTime.now().toIso8601String());
+    
+    // Send multiple test logs
+    FirebaseCrashlytics.instance.log('TEST LOG 1: App startup initiated');
+    FirebaseCrashlytics.instance.log('TEST LOG 2: Firebase initialized successfully');
+    FirebaseCrashlytics.instance.log('TEST LOG 3: Crashlytics verification passed');
+    FirebaseCrashlytics.instance.log('TEST LOG 4: Ready to receive crash reports');
     
     // Send a test non-fatal error to verify reporting works
     // This will appear in Firebase Console as a non-fatal error
     FirebaseCrashlytics.instance.recordError(
-      Exception('Test: Crashlytics is working correctly'),
+      Exception('TEST: Crashlytics is working correctly - This is a test error'),
       StackTrace.current,
       fatal: false,
-      reason: 'This is a test to verify Crashlytics is configured properly',
+      reason: 'This is a comprehensive test to verify Crashlytics is configured properly and receiving data',
+    );
+    
+    // Send another test error with different type
+    FirebaseCrashlytics.instance.log('TEST LOG 5: Sending second test error');
+    FirebaseCrashlytics.instance.recordError(
+      Exception('TEST: Crashlytics connectivity verified'),
+      StackTrace.current,
+      fatal: false,
+      reason: 'Second test to confirm Crashlytics can receive multiple errors',
     );
     
     if (kDebugMode) {
-      print('SUCCESS: Crashlytics test error sent - check Firebase Console in 1-5 minutes');
-      print('INFO: If you don\'t see this in Firebase Console, check bundle ID match');
+      print('CRASHLYTICS TEST: ✅ COMPLETE');
+      print('CRASHLYTICS TEST: Test logs and errors sent successfully');
+      print('CRASHLYTICS TEST: Check Firebase Console → Crashlytics in 1-5 minutes');
+      print('CRASHLYTICS TEST: You should see:');
+      print('CRASHLYTICS TEST:   - "TEST: Crashlytics is working correctly"');
+      print('CRASHLYTICS TEST:   - "TEST: Crashlytics connectivity verified"');
+      print('CRASHLYTICS TEST:   - Custom keys with app version, build number, etc.');
+      print('CRASHLYTICS TEST: If you DON\'T see these in Firebase Console:');
+      print('CRASHLYTICS TEST:   1. Check bundle ID matches GoogleService-Info.plist');
+      print('CRASHLYTICS TEST:   2. Verify GoogleService-Info.plist is in Xcode project');
+      print('CRASHLYTICS TEST:   3. Check Firebase Console → Crashlytics → Settings');
+      print('CRASHLYTICS TEST:   4. Verify app is registered in Firebase project');
     }
   } catch (e, stackTrace) {
     if (kDebugMode) {
-      print('ERROR: Crashlytics test failed: $e');
-      print('ERROR: Stack trace: $stackTrace');
-      print('ERROR: This means Crashlytics is not working properly');
+      print('CRASHLYTICS TEST: ❌ FAILED');
+      print('CRASHLYTICS TEST: Error: $e');
+      print('CRASHLYTICS TEST: Stack trace: $stackTrace');
+      print('CRASHLYTICS TEST: This means Crashlytics is not working properly');
     }
   }
 }
