@@ -47,11 +47,22 @@ workflows:
       - name: Set up code signing settings on Xcode project
         script: |
           xcode-project use-profiles
+      # - name: Build IPA
+      #   script: |
+      #     flutter build ipa \
+      #       --release \
+      #       --export-options-plist=ios/export_options.plist
       - name: Build IPA
         script: |
-          flutter build ipa \
-            --release \
-            --export-options-plist=ios/export_options.plist
+        # Use the Codemagic build counter for FLUTTER_BUILD_NUMBER (Bundle Version)
+        # This fixes the App Store Connect duplicate build number error.
+        
+        # NOTE: You must replace '1.0.0' with your actual marketing version.
+        flutter build ipa \
+          --release \
+          --build-name=1.0.0 \
+          --build-number=$PROJECT_BUILD_NUMBER \
+          --export-options-plist=ios/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
