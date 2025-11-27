@@ -37,6 +37,24 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
+    # Fix nanopb header include issue for iOS framework headers
+    target.build_configurations.each do |config|
+      config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
+    end
+  end
+  
+  # Patch nanopb headers to fix include issue
+  nanopb_path = File.join(installer.sandbox.root, 'nanopb')
+  if Dir.exist?(nanopb_path)
+    pb_common_h = File.join(nanopb_path, 'nanopb', 'pb_common.h')
+    if File.exist?(pb_common_h)
+      content = File.read(pb_common_h)
+      # Replace double quotes with angle brackets for pb.h include
+      content.gsub!(/#include\s+"pb\.h"/, '#include <pb.h>')
+      File.write(pb_common_h, content)
+      puts "✅ Fixed nanopb pb_common.h include issue"
+    end
   end
 end
 

@@ -66,3 +66,4 @@ Write-Host "This may take a minute on first run..." -ForegroundColor Yellow
 & $flutterPath run -d chrome
 
 
+

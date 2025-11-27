@@ -22,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
   bool _rememberMe = false;
   bool _isLoading = false;
 
@@ -29,7 +31,14 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  // Dismiss keyboard when tapping outside
+  void _dismissKeyboard() {
+    FocusScope.of(context).unfocus();
   }
 
   // Dedicated login method
@@ -84,8 +93,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             );
             
-            Navigator.of(context).pushReplacement(
+            // Use pushAndRemoveUntil to prevent going back to login screen
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+              (route) => false, // Remove all previous routes
             );
           } else {
             // For regular users, check their status from the login response first
@@ -132,8 +143,10 @@ class _LoginScreenState extends State<LoginScreen> {
             // Small delay to show the message
             await Future.delayed(const Duration(milliseconds: 1000));
             
-            Navigator.of(context).pushReplacement(
+            // Use pushAndRemoveUntil to prevent going back to login screen
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => destinationScreen),
+              (route) => false, // Remove all previous routes
             );
           }
         }
@@ -151,8 +164,10 @@ class _LoginScreenState extends State<LoginScreen> {
           // Small delay to show the message
           await Future.delayed(const Duration(milliseconds: 1000));
           
-          Navigator.of(context).pushReplacement(
+          // Use pushAndRemoveUntil to prevent going back to login screen
+          Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const ProfilePendingReviewScreen()),
+            (route) => false, // Remove all previous routes
           );
         }
       } else {
@@ -205,14 +220,22 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true, // Allow screen to resize when keyboard appears
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
+        child: GestureDetector(
+          onTap: _dismissKeyboard, // Dismiss keyboard when tapping outside
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag, // Dismiss keyboard on scroll
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom, // Add padding when keyboard appears
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                const SizedBox(height: 40), // Use SizedBox instead of Spacer for better keyboard handling
                 Center(
                   child: Text(
                     'H',
@@ -240,7 +263,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       TextFormField(
                         controller: _emailController,
+                        focusNode: _emailFocusNode,
                         keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next, // Show "Next" button on keyboard
+                        onFieldSubmitted: (_) {
+                          // Move focus to password field when "Next" is pressed
+                          FocusScope.of(context).requestFocus(_passwordFocusNode);
+                        },
                         decoration: InputDecoration(
                           labelText: 'Email Address',
                           prefixIcon: Padding(
@@ -272,7 +301,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _passwordController,
+                        focusNode: _passwordFocusNode,
                         obscureText: true,
+                        textInputAction: TextInputAction.done, // Show "Done" button on keyboard
+                        onFieldSubmitted: (_) {
+                          // Dismiss keyboard and trigger login when "Done" is pressed
+                          _dismissKeyboard();
+                          if (!_isLoading) {
+                            _performLogin();
+                          }
+                        },
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: Padding(
@@ -374,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontFamily: 'BioRhyme'),
                         ),
                 ),
-                const Spacer(),
+                const SizedBox(height: 24), // Use SizedBox instead of Spacer for better keyboard handling
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -402,6 +440,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }
