@@ -71,7 +71,7 @@ class _JobDetailsEditScreenState extends State<JobDetailsEditScreen> {
                 const SizedBox(height: 8),
                 _buildTextFormField(
                   controller: _titleController,
-                  hintText: 'Enter job title',
+                  labelText: 'Enter job title',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a job title';
@@ -87,7 +87,7 @@ class _JobDetailsEditScreenState extends State<JobDetailsEditScreen> {
                 const SizedBox(height: 8),
                 _buildTextFormField(
                   controller: _descriptionController,
-                  hintText: 'Describe the job details',
+                  labelText: 'Describe the job details',
                   maxLines: 4,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -104,7 +104,7 @@ class _JobDetailsEditScreenState extends State<JobDetailsEditScreen> {
                 const SizedBox(height: 8),
                 _buildTextFormField(
                   controller: _priceController,
-                  hintText: 'Enter price',
+                  labelText: 'Enter price',
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.attach_money),
                   validator: (value) {
@@ -214,7 +214,7 @@ class _JobDetailsEditScreenState extends State<JobDetailsEditScreen> {
                 const SizedBox(height: 8),
                 _buildTextFormField(
                   controller: _locationController,
-                  hintText: 'Enter location',
+                  labelText: 'Enter location',
                   prefixIcon: const Icon(Icons.location_on),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -300,7 +300,7 @@ class _JobDetailsEditScreenState extends State<JobDetailsEditScreen> {
 
   Widget _buildTextFormField({
     required TextEditingController controller,
-    required String hintText,
+    required String labelText,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
     Widget? prefixIcon,
@@ -318,11 +318,14 @@ class _JobDetailsEditScreenState extends State<JobDetailsEditScreen> {
         keyboardType: keyboardType,
         maxLines: maxLines,
         decoration: InputDecoration(
-          hintText: hintText,
+          labelText: labelText,
+          labelStyle: const TextStyle(
+            color: Colors.black38,
+            fontFamily: 'LifeSavers',
+          ),
           prefixIcon: prefixIcon,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: InputBorder.none,
-          hintStyle: const TextStyle(color: Colors.black54),
         ),
       ),
     );

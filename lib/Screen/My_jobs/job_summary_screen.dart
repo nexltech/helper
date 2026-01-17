@@ -360,6 +360,15 @@ class _JobSummaryScreenState extends State<JobSummaryScreen> {
 
   void _handleSubmit(BuildContext context, CrudJobProvider jobProvider) async {
     try {
+      // Ensure auth token is set before submitting
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.user?.token != null) {
+        jobProvider.setAuthToken(userProvider.user!.token!);
+        print('JobSummary: Token set from userProvider: ${userProvider.user!.token!.substring(0, userProvider.user!.token!.length > 10 ? 10 : userProvider.user!.token!.length)}...');
+      } else {
+        print('JobSummary: WARNING - userProvider.token is null!');
+      }
+      
       // Clear any previous messages
       jobProvider.clearMessages();
       

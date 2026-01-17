@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:job/Screen/jobBoarding/confirm_application_screen.dart';
 import 'package:job/Screen/jobBoarding/report_job_screen.dart';
+import 'package:job/Screen/profile/view_user_profile_screen.dart';
 import '../../models/job_model.dart';
 
 class JobDetailsScreen extends StatelessWidget {
@@ -44,15 +45,21 @@ class JobDetailsScreen extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.blue.shade100,
-                      child: Text(
-                        job.jobTitle.isNotEmpty ? job.jobTitle[0].toUpperCase() : 'J',
-                        style: TextStyle(
-                          color: Colors.blue.shade700,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                    // Profile Picture - Clickable
+                    GestureDetector(
+                      onTap: () => _navigateToUserProfile(context, job),
+                      child: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.blue.shade100,
+                        child: Text(
+                          job.user?.name.isNotEmpty == true 
+                            ? job.user!.name[0].toUpperCase()
+                            : (job.jobTitle.isNotEmpty ? job.jobTitle[0].toUpperCase() : 'J'),
+                          style: TextStyle(
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),
@@ -72,23 +79,40 @@ class JobDetailsScreen extends StatelessWidget {
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Text(
-                                'Posted by: ${job.userId.isNotEmpty ? job.userId : 'Unknown'}',
-                                style: const TextStyle(
-                                  fontFamily: 'LifeSavers',
-                                  fontSize: 14,
-                                  color: Colors.black87,
+                              // Posted by - Clickable
+                              GestureDetector(
+                                onTap: () => _navigateToUserProfile(context, job),
+                                child: Text(
+                                  'Posted by: ${job.user?.name ?? (job.userId.isNotEmpty ? job.userId : 'Unknown')}',
+                                  style: const TextStyle(
+                                    fontFamily: 'LifeSavers',
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.blue,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              Icon(Icons.star, color: Colors.amber, size: 16),
-                              const SizedBox(width: 2),
-                              Text(
-                                '4.8 (23 Reviews)',
-                                style: const TextStyle(
-                                  fontFamily: 'LifeSavers',
-                                  fontSize: 13,
-                                  color: Colors.black54,
+                              // Reviews - Clickable
+                              GestureDetector(
+                                onTap: () => _navigateToUserProfileReviews(context, job),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.star, color: Colors.amber, size: 16),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '4.8 (23 Reviews)',
+                                      style: const TextStyle(
+                                        fontFamily: 'LifeSavers',
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: Colors.blue,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -328,6 +352,66 @@ class JobDetailsScreen extends StatelessWidget {
       return '$displayHour:$minute $period';
     } catch (e) {
       return 'Invalid time';
+    }
+  }
+
+  void _navigateToUserProfile(BuildContext context, JobPost job) {
+    if (job.user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewUserProfileScreen(
+            userId: job.user!.id,
+            userName: job.user!.name,
+            userEmail: job.user!.email,
+          ),
+        ),
+      );
+    } else if (job.userId.isNotEmpty) {
+      // Try to parse userId as int
+      final userId = int.tryParse(job.userId);
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewUserProfileScreen(
+              userId: userId,
+              userName: job.userId,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToUserProfileReviews(BuildContext context, JobPost job) {
+    if (job.user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewUserProfileScreen(
+            userId: job.user!.id,
+            userName: job.user!.name,
+            userEmail: job.user!.email,
+            initialTabIndex: 1, // Open to Reviews tab
+          ),
+        ),
+      );
+    } else if (job.userId.isNotEmpty) {
+      // Try to parse userId as int
+      final userId = int.tryParse(job.userId);
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewUserProfileScreen(
+              userId: userId,
+              userName: job.userId,
+              initialTabIndex: 1, // Open to Reviews tab
+            ),
+          ),
+        );
+      }
     }
   }
 }

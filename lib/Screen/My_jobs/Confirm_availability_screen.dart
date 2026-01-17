@@ -128,8 +128,11 @@ class _ConfirmAvailabilityScreenState extends State<ConfirmAvailabilityScreen> {
                     padding: const EdgeInsets.only(left: 40.0),
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: 'Write reason...',
-                        hintStyle: const TextStyle(fontFamily: 'LifeSavers'),
+                        labelText: 'Write reason...',
+                        labelStyle: const TextStyle(
+                          color: Colors.black38,
+                          fontFamily: 'LifeSavers',
+                        ),
                         isDense: true,
                         border: OutlineInputBorder(),
                       ),

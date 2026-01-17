@@ -4,6 +4,7 @@ import 'package:job/Screen/jobBoarding/navbar.dart';
 import 'package:job/Screen/profile/client_profile_screen.dart';
 import 'package:job/Screen/profile/worker_profile_screen.dart';
 import 'package:job/Screen/profile/both_profile_screen.dart';
+import 'package:job/Screen/profile/view_user_profile_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/crud_job_provider.dart';
@@ -203,7 +204,7 @@ class _ConfirmApplicationScreenState extends State<ConfirmApplicationScreen> {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () {
-                                _navigateToProfile(context);
+                                _navigateToJobCreatorProfile(context);
                               },
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(color: Colors.black54),
@@ -311,5 +312,36 @@ class _ConfirmApplicationScreenState extends State<ConfirmApplicationScreen> {
       context,
       MaterialPageRoute(builder: (context) => profileScreen),
     );
+  }
+
+  void _navigateToJobCreatorProfile(BuildContext context) {
+    final job = widget.job;
+    
+    if (job.user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewUserProfileScreen(
+            userId: job.user!.id,
+            userName: job.user!.name,
+            userEmail: job.user!.email,
+          ),
+        ),
+      );
+    } else if (job.userId.isNotEmpty) {
+      // Try to parse userId as int
+      final userId = int.tryParse(job.userId);
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewUserProfileScreen(
+              userId: userId,
+              userName: job.userId,
+            ),
+          ),
+        );
+      }
+    }
   }
 }

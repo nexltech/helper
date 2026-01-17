@@ -141,11 +141,20 @@ class _AdminReportsScreenState extends State<AdminReportsScreen>
               borderRadius: BorderRadius.circular(10),
               color: Colors.white,
             ),
-            child: const Center(
-              child: Icon(
-                Icons.notifications,
+            child: Center(
+              child: Image.asset(
+                'assets/Icons/Alarm.png',
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
                 color: Colors.green,
-                size: 24,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.notifications,
+                    color: Colors.green,
+                    size: 24,
+                  );
+                },
               ),
             ),
           ),
@@ -173,10 +182,10 @@ class _AdminReportsScreenState extends State<AdminReportsScreen>
           fontSize: 16,
         ),
         decoration: InputDecoration(
-          hintText: 'Search',
-          hintStyle: const TextStyle(
+          labelText: 'Search',
+          labelStyle: const TextStyle(
+            color: Colors.black38,
             fontFamily: 'LifeSavers',
-            color: Colors.black26,
           ),
           border: InputBorder.none,
           suffixIcon: Padding(

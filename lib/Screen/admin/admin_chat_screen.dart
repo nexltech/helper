@@ -223,11 +223,20 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
               borderRadius: BorderRadius.circular(10),
               color: Colors.white,
             ),
-            child: const Center(
-              child: Icon(
-                Icons.notifications,
+            child: Center(
+              child: Image.asset(
+                'assets/Icons/Alarm.png',
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
                 color: Colors.green,
-                size: 24,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.notifications,
+                    color: Colors.green,
+                    size: 24,
+                  );
+                },
               ),
             ),
           ),
@@ -256,10 +265,10 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
           fontSize: 16,
         ),
         decoration: InputDecoration(
-          hintText: 'Search',
-          hintStyle: const TextStyle(
+          labelText: 'Search',
+          labelStyle: const TextStyle(
+            color: Colors.black38,
             fontFamily: 'LifeSavers',
-            color: Colors.black26,
           ),
           border: InputBorder.none,
           suffixIcon: Padding(
@@ -539,10 +548,10 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
             child: TextField(
               controller: _messageController,
               decoration: const InputDecoration(
-                hintText: 'Enter your text here',
-                hintStyle: TextStyle(
+                labelText: 'Enter your text here',
+                labelStyle: TextStyle(
+                  color: Colors.black38,
                   fontFamily: 'LifeSavers',
-                  color: Colors.black54,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),

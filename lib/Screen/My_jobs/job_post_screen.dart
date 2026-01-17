@@ -86,7 +86,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -118,7 +118,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
               controller: _jobTitleController,
               icon: Icons.assignment,
               iconColor: Colors.orange,
-              hintText: 'Enter job title',
+              labelText: 'Enter job title',
             ),
             const SizedBox(height: 16),
             
@@ -132,7 +132,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
               controller: _paymentController,
               icon: Icons.account_balance_wallet,
               iconColor: Colors.blue,
-              hintText: 'Enter payment amount',
+              labelText: 'Enter payment amount',
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
@@ -143,7 +143,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
               controller: _addressController,
               icon: Icons.location_on,
               iconColor: Colors.red,
-              hintText: 'Enter job location',
+              labelText: 'Enter job location',
             ),
             const SizedBox(height: 16),
             
@@ -153,7 +153,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
               controller: _dateTimeController,
               icon: Icons.calendar_today,
               iconColor: Colors.green,
-              hintText: 'Select date and time',
+              labelText: 'Select date and time',
               readOnly: true,
               onTap: () => _selectDateTime(),
             ),
@@ -165,7 +165,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
               controller: _descriptionController,
               icon: Icons.edit,
               iconColor: Colors.purple,
-              hintText: 'Describe the job details',
+              labelText: 'Describe the job details',
               maxLines: 3,
             ),
             const SizedBox(height: 16),
@@ -183,7 +183,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
     required TextEditingController controller,
     required IconData icon,
     required Color iconColor,
-    required String hintText,
+    required String labelText,
     TextInputType? keyboardType,
     bool readOnly = false,
     int maxLines = 1,
@@ -205,7 +205,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black26),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(25),
           ),
           child: TextFormField(
             controller: controller,
@@ -214,15 +214,23 @@ class _JobPostScreenState extends State<JobPostScreen> {
             maxLines: maxLines,
             onTap: onTap,
             decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: const TextStyle(
+              labelText: labelText,
+              labelStyle: const TextStyle(
+                color: Colors.black38,
                 fontFamily: 'LifeSavers',
-                color: Colors.black26,
               ),
               border: InputBorder.none,
               prefixIcon: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: Icon(icon, color: iconColor, size: 20),
+                child: Image.asset(
+                  _getIconPath(label),
+                  width: 20,
+                  height: 20,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(icon, color: iconColor, size: 20);
+                  },
+                ),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -258,13 +266,21 @@ class _JobPostScreenState extends State<JobPostScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black26),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(25),
             ),
             child: Row(
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Icon(Icons.folder, color: Colors.orange, size: 20),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Image.asset(
+                    'assets/Icons/job category.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.folder, color: Colors.orange, size: 20);
+                    },
+                  ),
                 ),
                 Expanded(
                   child: Text(
@@ -304,13 +320,21 @@ class _JobPostScreenState extends State<JobPostScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black26),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(25),
             ),
             child: Row(
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Icon(Icons.image, color: Colors.blue, size: 20),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Image.asset(
+                    'assets/Icons/upload image.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.image, color: Colors.blue, size: 20);
+                    },
+                  ),
                 ),
                 Expanded(
                   child: Text(
@@ -332,11 +356,11 @@ class _JobPostScreenState extends State<JobPostScreen> {
             height: 120,
             width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(25),
               border: Border.all(color: Colors.black26),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(25),
               child: Image.file(
                 _selectedImage!,
                 fit: BoxFit.cover,
@@ -356,7 +380,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(25),
             side: const BorderSide(color: Colors.black, width: 1),
           ),
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -396,12 +420,69 @@ class _JobPostScreenState extends State<JobPostScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.black,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
+            dialogTheme: DialogThemeData(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            datePickerTheme: DatePickerThemeData(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              headerBackgroundColor: Colors.black,
+              headerForegroundColor: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     
     if (pickedDate != null) {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: Colors.black,
+                onPrimary: Colors.white,
+                surface: Colors.white,
+                onSurface: Colors.black,
+              ),
+              dialogBackgroundColor: Colors.white,
+              dialogTheme: DialogThemeData(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              timePickerTheme: TimePickerThemeData(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                hourMinuteShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                dayPeriodBorderSide: const BorderSide(color: Colors.black),
+                dayPeriodShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+            ),
+            child: child!,
+          );
+        },
       );
       
       if (pickedTime != null) {
@@ -447,6 +528,23 @@ class _JobPostScreenState extends State<JobPostScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  String _getIconPath(String label) {
+    switch (label.toLowerCase()) {
+      case 'job title':
+        return 'assets/Icons/job title.png';
+      case 'payment':
+        return 'assets/Icons/payment.png';
+      case 'address':
+        return 'assets/Icons/Location.png';
+      case 'date & time':
+        return 'assets/Icons/date & time.png';
+      case 'job description':
+        return 'assets/Icons/job description.png';
+      default:
+        return '';
     }
   }
 

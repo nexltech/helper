@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/chat_provider.dart';
@@ -14,11 +15,35 @@ class ChatListScreen extends StatefulWidget {
   State<ChatListScreen> createState() => _ChatListScreenState();
 }
 
-class _ChatListScreenState extends State<ChatListScreen> {
+class _ChatListScreenState extends State<ChatListScreen> with WidgetsBindingObserver {
+  Timer? _chatPollTimer;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadChats();
+    _startChatPolling();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _chatPollTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // App came to foreground - refresh chats immediately
+      _loadChats();
+      _startChatPolling();
+    } else if (state == AppLifecycleState.paused) {
+      // App went to background - stop polling to save battery
+      _chatPollTimer?.cancel();
+    }
   }
 
   void _loadChats() {
@@ -28,7 +53,21 @@ class _ChatListScreenState extends State<ChatListScreen> {
       
       if (userProvider.user?.token != null) {
         chatProvider.setAuthToken(userProvider.user!.token!);
-        chatProvider.getAllChats();
+        chatProvider.getAllChats(showLoading: true);
+      }
+    });
+  }
+
+  void _startChatPolling() {
+    // Poll for new chats every 5 seconds when screen is active
+    _chatPollTimer?.cancel();
+    _chatPollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) {
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+        chatProvider.getAllChats(showLoading: false).catchError((error) {
+          // Silently handle errors during polling to prevent crashes
+          print('Error polling chats: $error');
+        });
       }
     });
   }
@@ -37,6 +76,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+      resizeToAvoidBottomInset: true, // Allow screen to resize when keyboard appears
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -64,7 +104,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           return Column(
             children: [
               // Error Messages
-              if (chatProvider.errorMessage != null)
+              if (chatProvider.errorMessage != null && chatProvider.errorMessage!.isNotEmpty)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
@@ -74,9 +114,25 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red),
                   ),
-                  child: Text(
-                    'Error: ${chatProvider.errorMessage}',
-                    style: const TextStyle(color: Colors.red),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Error: ${chatProvider.errorMessage}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.red, size: 18),
+                        onPressed: () {
+                          chatProvider.clearMessages();
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
                   ),
                 ),
               
@@ -158,7 +214,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
           },
           backgroundColor: const Color(0xFFDDF8E5),
           elevation: 0,
-          child: const Icon(Icons.add, color: Colors.green, size: 48),
+          child: Image.asset(
+            'assets/Icons/Plus Math.png',
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.add, color: Colors.green, size: 48);
+            },
+          ),
         ),
       ),
     );

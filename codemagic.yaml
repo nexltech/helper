@@ -54,15 +54,12 @@ workflows:
       #       --export-options-plist=ios/export_options.plist
       - name: Build IPA
         script: |
-        # Use the Codemagic build counter for FLUTTER_BUILD_NUMBER (Bundle Version)
-        # This fixes the App Store Connect duplicate build number error.
-        
-        # NOTE: Version 1.0.3 with bundle ID fix (matching App Store: com.Helpr)
-        flutter build ipa \
-          --release \
-          --build-name=1.0.3 \
-          --build-number=$PROJECT_BUILD_NUMBER \
-          --export-options-plist=ios/export_options.plist
+          # Use the version from pubspec.yaml automatically
+          # Build number uses Codemagic's PROJECT_BUILD_NUMBER to ensure unique builds
+          flutter build ipa \
+            --release \
+            --build-number=$PROJECT_BUILD_NUMBER \
+            --export-options-plist=ios/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log

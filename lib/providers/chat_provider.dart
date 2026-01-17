@@ -40,7 +40,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void _setError(String error) {
-    _errorMessage = error;
+    _errorMessage = error.isNotEmpty ? error : null;
     _successMessage = null;
     notifyListeners();
   }
@@ -57,7 +57,7 @@ class ChatProvider extends ChangeNotifier {
     required int receiverId,
   }) async {
     _setLoading(true);
-    _setError('');
+    _errorMessage = null; // Clear error before making request
 
     try {
       final response = await _apiService.startChat(
@@ -67,7 +67,8 @@ class ChatProvider extends ChangeNotifier {
       
       _currentChat = response.chat;
       _currentChatMessages = response.chat.messages;
-      _setSuccess(response.message);
+      _errorMessage = null; // Clear any previous errors on success
+      _successMessage = response.message;
       
       // Add to chats list if not already present
       if (!_chats.any((chat) => chat.id == response.chat.id)) {
@@ -88,7 +89,7 @@ class ChatProvider extends ChangeNotifier {
     required String message,
   }) async {
     _setLoading(true);
-    _setError('');
+    _errorMessage = null; // Clear error before making request
 
     try {
       final response = await _apiService.sendMessage(
@@ -116,7 +117,8 @@ class ChatProvider extends ChangeNotifier {
         );
       }
       
-      _setSuccess(response.message);
+      _errorMessage = null; // Clear any previous errors on success
+      _successMessage = response.message;
       notifyListeners();
     } catch (e) {
       _setError('Failed to send message: $e');
@@ -126,37 +128,61 @@ class ChatProvider extends ChangeNotifier {
   }
 
   // Get all chats
-  Future<void> getAllChats() async {
-    _setLoading(true);
-    _setError('');
+  Future<void> getAllChats({bool showLoading = false}) async {
+    if (showLoading) {
+      _setLoading(true);
+    }
+    _errorMessage = null; // Clear error before making request
 
     try {
       final response = await _apiService.getAllChats();
       _chats = response.data;
-      _setSuccess(response.message);
+      _errorMessage = null; // Clear any previous errors on success
+      _successMessage = response.message;
       notifyListeners();
     } catch (e) {
-      _setError('Failed to get chats: $e');
+      // Only show error if not polling (to avoid spam during polling)
+      if (showLoading) {
+        _setError('Failed to get chats: $e');
+      } else {
+        // During polling, just clear error silently
+        _errorMessage = null;
+        notifyListeners();
+      }
     } finally {
-      _setLoading(false);
+      if (showLoading) {
+        _setLoading(false);
+      }
     }
   }
 
   // Get chat messages
-  Future<void> getChatMessages(int chatId) async {
-    _setLoading(true);
-    _setError('');
+  Future<void> getChatMessages(int chatId, {bool showLoading = false}) async {
+    if (showLoading) {
+      _setLoading(true);
+    }
+    _errorMessage = null; // Clear error before making request
 
     try {
       final response = await _apiService.getChatMessages(chatId);
       _currentChat = response.chat;
       _currentChatMessages = response.messages;
-      _setSuccess('Messages loaded successfully');
+      _errorMessage = null; // Clear any previous errors on success
+      _successMessage = 'Messages loaded successfully';
       notifyListeners();
     } catch (e) {
-      _setError('Failed to get chat messages: $e');
+      // Only show error if not polling (to avoid spam during polling)
+      if (showLoading) {
+        _setError('Failed to get chat messages: $e');
+      } else {
+        // During polling, just clear error silently
+        _errorMessage = null;
+        notifyListeners();
+      }
     } finally {
-      _setLoading(false);
+      if (showLoading) {
+        _setLoading(false);
+      }
     }
   }
 
@@ -234,7 +260,7 @@ class ChatProvider extends ChangeNotifier {
 
   // Refresh all data
   Future<void> refreshAllData() async {
-    await getAllChats();
+    await getAllChats(showLoading: true);
   }
 
   // Clear all data

@@ -157,7 +157,7 @@ class _AdminMyAccountScreenState extends State<AdminMyAccountScreen> {
                 ),
                 child: Center(
                   child: Image.asset(
-                    'assets/Icons/Bell.png',
+                    'assets/Icons/Alarm.png',
                     width: 24,
                     height: 24,
                     fit: BoxFit.contain,
@@ -485,11 +485,20 @@ class _AdminMyAccountScreenState extends State<AdminMyAccountScreen> {
             ),
             child: Stack(
               children: [
-                const Center(
-                  child: Icon(
-                    Icons.notifications,
+                Center(
+                  child: Image.asset(
+                    'assets/Icons/Alarm.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
                     color: Colors.green,
-                    size: 20,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.notifications,
+                        color: Colors.green,
+                        size: 20,
+                      );
+                    },
                   ),
                 ),
                 Positioned(
@@ -762,12 +771,17 @@ class _AdminMyAccountScreenState extends State<AdminMyAccountScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          backgroundColor: Colors.white,
           title: const Text(
             'Log Out',
             style: TextStyle(
               fontFamily: 'HomemadeApple',
-              fontSize: 20,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
           content: const Text(
@@ -775,13 +789,29 @@ class _AdminMyAccountScreenState extends State<AdminMyAccountScreen> {
             style: TextStyle(
               fontFamily: 'LifeSavers',
               fontSize: 16,
+              color: Colors.black87,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  side: const BorderSide(color: Colors.black26, width: 1),
+                ),
+              ),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  fontFamily: 'LifeSavers',
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
             ),
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -789,8 +819,21 @@ class _AdminMyAccountScreenState extends State<AdminMyAccountScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                elevation: 0,
               ),
-              child: const Text('Log Out', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Log Out',
+                style: TextStyle(
+                  fontFamily: 'LifeSavers',
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );

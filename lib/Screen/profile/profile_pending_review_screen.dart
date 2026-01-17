@@ -109,7 +109,7 @@ class _ProfilePendingReviewScreenState extends State<ProfilePendingReviewScreen>
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: Image.asset('assets/Icons/Bell.png',
+                    icon: Image.asset('assets/Icons/Alarm.png',
                         width: 48, height: 48),
                     onPressed: () {},
                   ),
@@ -143,7 +143,11 @@ class _ProfilePendingReviewScreenState extends State<ProfilePendingReviewScreen>
                       child: TextField(
                         style: TextStyle(fontFamily: 'LifeSavers'),
                         decoration: InputDecoration(
-                          hintText: 'Search',
+                          labelText: 'Search',
+                          labelStyle: TextStyle(
+                            color: Colors.black38,
+                            fontFamily: 'LifeSavers',
+                          ),
                           border: InputBorder.none,
                           isDense: true,
                         ),

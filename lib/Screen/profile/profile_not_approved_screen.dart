@@ -79,7 +79,11 @@ class ProfileNotApprovedScreen extends StatelessWidget {
                       child: TextField(
                         style: TextStyle(fontFamily: 'LifeSavers'),
                         decoration: InputDecoration(
-                          hintText: 'Search',
+                          labelText: 'Search',
+                          labelStyle: TextStyle(
+                            color: Colors.black38,
+                            fontFamily: 'LifeSavers',
+                          ),
                           border: InputBorder.none,
                           isDense: true,
                         ),

@@ -126,10 +126,10 @@ class _CancelJobDialogState extends State<CancelJobDialog> {
                 controller: _commentsController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Tell us more about your cancellation...',
-                  hintStyle: TextStyle(
+                  labelText: 'Tell us more about your cancellation...',
+                  labelStyle: TextStyle(
+                    color: Colors.black38,
                     fontFamily: 'LifeSavers',
-                    color: Colors.black26,
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.all(12),

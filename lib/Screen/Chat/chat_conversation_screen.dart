@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/chat_provider.dart';
@@ -16,44 +17,133 @@ class ChatConversationScreen extends StatefulWidget {
   State<ChatConversationScreen> createState() => _ChatConversationScreenState();
 }
 
-class _ChatConversationScreenState extends State<ChatConversationScreen> {
+class _ChatConversationScreenState extends State<ChatConversationScreen> with WidgetsBindingObserver {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _messagePollTimer;
+  int _previousMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadChatMessages();
+    _startMessagePolling();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _messagePollTimer?.cancel();
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // App came to foreground - refresh messages immediately
+      _loadChatMessages();
+      _startMessagePolling();
+    } else if (state == AppLifecycleState.paused) {
+      // App went to background - stop polling to save battery
+      _messagePollTimer?.cancel();
+    }
   }
 
   void _loadChatMessages() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final chatProvider = Provider.of<ChatProvider>(context, listen: false);
       
       if (userProvider.user?.token != null) {
         chatProvider.setAuthToken(userProvider.user!.token!);
         chatProvider.setCurrentChat(widget.chat);
-        chatProvider.getChatMessages(widget.chat.id);
+        chatProvider.getChatMessages(widget.chat.id, showLoading: true).then((_) {
+          if (!mounted) return;
+          // Auto-scroll to bottom after messages load
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final currentCount = chatProvider.currentChatMessages.length;
+              if (currentCount > _previousMessageCount && _previousMessageCount > 0) {
+                _scrollToBottom();
+              } else if (_previousMessageCount == 0) {
+                // First load - scroll to bottom
+                _scrollToBottom();
+              }
+              _previousMessageCount = currentCount;
+            }
+          });
+        }).catchError((error) {
+          print('Error loading messages: $error');
+        });
       }
     });
   }
 
-  @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
+  void _startMessagePolling() {
+    // Poll for new messages every 3 seconds when screen is active
+    _messagePollTimer?.cancel();
+    _messagePollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (mounted) {
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+        final currentCount = chatProvider.currentChatMessages.length;
+        
+        chatProvider.getChatMessages(widget.chat.id, showLoading: false).then((_) {
+          if (!mounted) return;
+          // Auto-scroll if new messages arrived
+          final newCount = chatProvider.currentChatMessages.length;
+          if (newCount > currentCount) {
+            // Use SchedulerBinding to ensure scroll happens after build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _scrollToBottom();
+              }
+            });
+          }
+        }).catchError((error) {
+          // Silently handle errors during polling to prevent crashes
+          print('Error polling messages: $error');
+        });
+      }
+    });
   }
+
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      // Use jumpTo for immediate scroll, or animateTo for smooth scroll
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      if (maxScroll > 0) {
+        _scrollController.animateTo(
+          maxScroll,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    } else {
+      // If scroll controller doesn't have clients yet, wait and try again
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scrollController.hasClients) {
+          final maxScroll = _scrollController.position.maxScrollExtent;
+          if (maxScroll > 0) {
+            _scrollController.animateTo(
+              maxScroll,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        }
+      });
     }
+  }
+
+  void _dismissKeyboard() {
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -65,6 +155,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+      resizeToAvoidBottomInset: true, // Allow screen to resize when keyboard appears
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -122,12 +213,15 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
           ),
         ],
       ),
-      body: Consumer<ChatProvider>(
-        builder: (context, chatProvider, child) {
-          return Column(
-            children: [
-              // Job Info Header
-              Container(
+      body: GestureDetector(
+        onTap: _dismissKeyboard, // Dismiss keyboard when tapping outside
+        behavior: HitTestBehavior.opaque,
+        child: Consumer<ChatProvider>(
+          builder: (context, chatProvider, child) {
+            return Column(
+              children: [
+                // Job Info Header
+                Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.all(16),
@@ -233,7 +327,12 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                           )
                         : ListView.builder(
                             controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              bottom: MediaQuery.of(context).viewInsets.bottom, // Add padding when keyboard appears
+                            ),
+                            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag, // Dismiss keyboard on scroll
                             itemCount: chatProvider.currentChatMessages.length,
                             itemBuilder: (context, index) {
                               final message = chatProvider.currentChatMessages[index];
@@ -244,7 +343,12 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
               // Message Input
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: 16 + MediaQuery.of(context).padding.bottom, // Add safe area padding for iOS
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
@@ -266,11 +370,13 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                         ),
                         child: TextField(
                           controller: _messageController,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => _sendMessage(),
                           decoration: const InputDecoration(
-                            hintText: 'Type a message...',
-                            hintStyle: TextStyle(
+                            labelText: 'Type a message...',
+                            labelStyle: TextStyle(
+                              color: Colors.black38,
                               fontFamily: 'LifeSavers',
-                              color: Colors.grey,
                             ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
@@ -315,6 +421,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
             ],
           );
         },
+      ),
       ),
     );
   }
@@ -423,7 +530,14 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
       message: message,
     ).then((_) {
       _messageController.clear();
+      _dismissKeyboard(); // Dismiss keyboard after sending
       _scrollToBottom();
+      // Refresh messages after sending to get any server-side updates
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          chatProvider.getChatMessages(widget.chat.id);
+        }
+      });
     });
   }
 

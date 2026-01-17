@@ -5,6 +5,8 @@ import 'package:job/Screen/jobBoarding/confirm_application_screen.dart';
 import 'package:job/Screen/jobBoarding/navbar.dart';
 import 'package:job/Screen/My_jobs/Review_screen.dart';
 import 'package:job/Screen/My_jobs/job_post_screen.dart';
+import 'package:job/Screen/profile/view_user_profile_screen.dart';
+import 'package:job/Screen/notifications/notifications_screen.dart';
 import '../../providers/crud_job_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/job_model.dart';
@@ -95,19 +97,37 @@ class _JobBoardMainScreenState extends State<JobBoardMainScreen> {
                           ],
                         ),
                       ),
-                      // Bell icon
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 2),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
-                        ),
-                        child: const Icon(
-                          Icons.notifications_outlined,
-                          color: Colors.black,
-                          size: 20,
+                      // Bell icon - Clickable
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationsScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                          ),
+                          child: Image.asset(
+                            'assets/Icons/Alarm.png',
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.notifications_outlined,
+                                color: Colors.black,
+                                size: 20,
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
@@ -223,7 +243,15 @@ class _JobBoardMainScreenState extends State<JobBoardMainScreen> {
           },
           backgroundColor: const Color(0xFFDDF8E5),
           elevation: 0,
-          child: const Icon(Icons.add, color: Colors.green, size: 48),
+          child: Image.asset(
+            'assets/Icons/Plus Math.png',
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.add, color: Colors.green, size: 48);
+            },
+          ),
         ),
       ),
     );
@@ -255,18 +283,21 @@ class _JobBoardMainScreenState extends State<JobBoardMainScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Picture
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.blue.shade100,
-                child: Text(
-                  job.user?.name.isNotEmpty == true 
-                    ? job.user!.name[0].toUpperCase() 
-                    : (job.jobTitle.isNotEmpty ? job.jobTitle[0].toUpperCase() : 'J'),
-                  style: TextStyle(
-                    color: Colors.blue.shade700,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+              // Profile Picture - Clickable
+              GestureDetector(
+                onTap: () => _navigateToUserProfile(job),
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.blue.shade100,
+                  child: Text(
+                    job.user?.name.isNotEmpty == true 
+                      ? job.user!.name[0].toUpperCase() 
+                      : (job.jobTitle.isNotEmpty ? job.jobTitle[0].toUpperCase() : 'J'),
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
               ),
@@ -292,26 +323,39 @@ class _JobBoardMainScreenState extends State<JobBoardMainScreen> {
                     // Rating
                     Row(
                       children: [
-                         // Posted by info - Show user name instead of ID
-                    Text(
-                      'Posted by: ${job.user?.name ?? job.userId}',
-                      style: const TextStyle(
-                        fontFamily: 'LifeSavers',
-                        fontSize: 14,
-                        color: Colors.black87,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.blue,
+                         // Posted by info - Show user name instead of ID - Clickable
+                    GestureDetector(
+                      onTap: () => _navigateToUserProfile(job),
+                      child: Text(
+                        'Posted by: ${job.user?.name ?? job.userId}',
+                        style: const TextStyle(
+                          fontFamily: 'LifeSavers',
+                          fontSize: 14,
+                          color: Colors.black87,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.blue,
+                        ),
                       ),
                     ),
                     SizedBox(width: 2,),
-                        Icon(Icons.star, color: Colors.amber, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          '4.8 (23 Reviews)',
-                          style: const TextStyle(
-                            fontFamily: 'LifeSavers',
-                            fontSize: 12,
-                            color: Colors.black54,
+                        GestureDetector(
+                          onTap: () => _navigateToUserProfileReviews(job),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.star, color: Colors.amber, size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                '4.8 (23 Reviews)',
+                                style: const TextStyle(
+                                  fontFamily: 'LifeSavers',
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.blue,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -674,6 +718,66 @@ class _JobBoardMainScreenState extends State<JobBoardMainScreen> {
         return 'Cancelled';
       default:
         return 'Applied';
+    }
+  }
+
+  void _navigateToUserProfile(JobPost job) {
+    if (job.user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewUserProfileScreen(
+            userId: job.user!.id,
+            userName: job.user!.name,
+            userEmail: job.user!.email,
+          ),
+        ),
+      );
+    } else if (job.userId.isNotEmpty) {
+      // Try to parse userId as int
+      final userId = int.tryParse(job.userId);
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewUserProfileScreen(
+              userId: userId,
+              userName: job.userId,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToUserProfileReviews(JobPost job) {
+    if (job.user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewUserProfileScreen(
+            userId: job.user!.id,
+            userName: job.user!.name,
+            userEmail: job.user!.email,
+            initialTabIndex: 1, // Open to Reviews tab
+          ),
+        ),
+      );
+    } else if (job.userId.isNotEmpty) {
+      // Try to parse userId as int
+      final userId = int.tryParse(job.userId);
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewUserProfileScreen(
+              userId: userId,
+              userName: job.userId,
+              initialTabIndex: 1, // Open to Reviews tab
+            ),
+          ),
+        );
+      }
     }
   }
 }

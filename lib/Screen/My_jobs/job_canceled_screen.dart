@@ -91,7 +91,7 @@ class JobCanceledScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'If this was a mistake or you need assistance, contact us at support@helprapp.com',
+                            'If this was a mistake or you need assistance, contact us at hellohelpr@gmail.com',
                             style: TextStyle(
                               fontFamily: 'LifeSavers',
                               fontSize: 14,

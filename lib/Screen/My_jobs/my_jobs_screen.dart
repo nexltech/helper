@@ -201,7 +201,7 @@ class _MyJobsScreenState extends State<MyJobsScreen>
                         ),
                         child: Center(
                           child: Image.asset(
-                            'assets/Icons/Bell.png',
+                            'assets/Icons/Alarm.png',
                             width: 88,
                             height: 88,
                             fit: BoxFit.contain,
@@ -393,7 +393,15 @@ class _MyJobsScreenState extends State<MyJobsScreen>
               },
               backgroundColor: const Color(0xFFDDF8E5),
               elevation: 0,
-              child: const Icon(Icons.add, color: Colors.green, size: 48),
+              child: Image.asset(
+                'assets/Icons/Plus Math.png',
+                width: 48,
+                height: 48,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.add, color: Colors.green, size: 48);
+                },
+              ),
             ),
           ),
         );

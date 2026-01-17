@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:job/Screen/jobBoarding/navbar.dart';
 import 'package:job/Screen/jobBoarding/job_details_screen.dart';
+import 'package:job/Screen/profile/view_user_profile_screen.dart';
 import '../../providers/crud_job_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/my_applications_provider.dart';
@@ -357,18 +358,21 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Picture
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.blue.shade100,
-                child: Text(
-                  job.user?.name.isNotEmpty == true 
-                    ? job.user!.name[0].toUpperCase() 
-                    : (job.jobTitle.isNotEmpty ? job.jobTitle[0].toUpperCase() : 'J'),
-                  style: TextStyle(
-                    color: Colors.blue.shade700,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+              // Profile Picture - Clickable
+              GestureDetector(
+                onTap: () => _navigateToUserProfile(job),
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.blue.shade100,
+                  child: Text(
+                    job.user?.name.isNotEmpty == true 
+                      ? job.user!.name[0].toUpperCase() 
+                      : (job.jobTitle.isNotEmpty ? job.jobTitle[0].toUpperCase() : 'J'),
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
               ),
@@ -390,32 +394,40 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Posted by info - Show user name instead of ID
-                    Text(
-                      'Posted by: ${job.user?.name ?? job.userId}',
-                      style: const TextStyle(
-                        fontFamily: 'LifeSavers',
-                        fontSize: 14,
-                        color: Colors.black87,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.blue,
+                    // Posted by info - Show user name instead of ID - Clickable
+                    GestureDetector(
+                      onTap: () => _navigateToUserProfile(job),
+                      child: Text(
+                        'Posted by: ${job.user?.name ?? job.userId}',
+                        style: const TextStyle(
+                          fontFamily: 'LifeSavers',
+                          fontSize: 14,
+                          color: Colors.black87,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.blue,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    // Rating
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.amber, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          '4.8 (23 Reviews)',
-                          style: const TextStyle(
-                            fontFamily: 'LifeSavers',
-                            fontSize: 12,
-                            color: Colors.black54,
+                    // Rating - Clickable
+                    GestureDetector(
+                      onTap: () => _navigateToUserProfileReviews(job),
+                      child: Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            '4.8 (23 Reviews)',
+                            style: const TextStyle(
+                              fontFamily: 'LifeSavers',
+                              fontSize: 12,
+                              color: Colors.black54,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.blue,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -571,7 +583,7 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           child: Container(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -579,7 +591,7 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
               children: [
                 Text(
                   'Confirm Application',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'HomemadeApple',
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -660,20 +672,19 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.grey),
+                          side: const BorderSide(color: Colors.black, width: 1.5),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(28),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           backgroundColor: Colors.white,
                         ),
                         child: const Text(
                           'Review Profile',
                           style: TextStyle(
-                            fontFamily: 'LifeSavers',
+                            fontFamily: 'BioRhyme',
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -686,20 +697,19 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
                           _showApplicationForm(job);
                         },
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.grey),
+                          side: const BorderSide(color: Colors.black, width: 1.5),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(28),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           backgroundColor: Colors.white,
                         ),
                         child: const Text(
                           'Yes, Apply Now',
                           style: TextStyle(
-                            fontFamily: 'LifeSavers',
+                            fontFamily: 'BioRhyme',
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -720,7 +730,7 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           child: Container(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -729,68 +739,101 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
                 Text(
                   'Apply for ${job.jobTitle}',
                   style: const TextStyle(
-                    fontFamily: 'LifeSavers',
-                    fontSize: 20,
+                    fontFamily: 'HomemadeApple',
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _coverLetterController,
-                  decoration: const InputDecoration(
-                    labelText: 'Cover Letter',
-                    hintText: 'Tell them why you\'re perfect for this job...',
-                    border: OutlineInputBorder(),
+                const SizedBox(height: 24),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black26),
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                  maxLines: 3,
+                  child: TextField(
+                    controller: _coverLetterController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tell them why you\'re perfect for this job...',
+                      labelStyle: TextStyle(
+                        color: Colors.black38,
+                        fontFamily: 'LifeSavers',
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    maxLines: 3,
+                  ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _availabilityController,
-                  decoration: const InputDecoration(
-                    labelText: 'Availability (comma-separated dates)',
-                    hintText: '2025-09-20 10:00, 2025-09-21 14:00',
-                    border: OutlineInputBorder(),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black26),
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                  onSubmitted: (value) {
-                    if (value.isNotEmpty) {
-                      setState(() {
-                        _availability.addAll(value.split(',').map((e) => e.trim()));
-                      });
-                    }
-                  },
+                  child: TextField(
+                    controller: _availabilityController,
+                    decoration: const InputDecoration(
+                      labelText: '2025-09-20 10:00, 2025-09-21 14:00',
+                      labelStyle: TextStyle(
+                        color: Colors.black38,
+                        fontFamily: 'LifeSavers',
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    onSubmitted: (value) {
+                      if (value.isNotEmpty) {
+                        setState(() {
+                          _availability.addAll(value.split(',').map((e) => e.trim()));
+                        });
+                      }
+                    },
+                  ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.grey),
+                          side: const BorderSide(color: Colors.black, width: 1.5),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(28),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: Colors.white,
                         ),
-                        child: const Text('Cancel'),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontFamily: 'BioRhyme',
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
+                      child: OutlinedButton(
                         onPressed: () => _submitApplication(job),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.black, width: 1.5),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(28),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: Colors.white,
                         ),
                         child: const Text(
                           'Submit Application',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            fontFamily: 'BioRhyme',
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ),
@@ -834,13 +877,32 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Text('Submitting application...'),
-            ],
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                const Text(
+                  'Submitting application...',
+                  style: TextStyle(
+                    fontFamily: 'LifeSavers',
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -890,6 +952,66 @@ class _ReportJobScreenState extends State<ReportJobScreen> {
             content: Text('Failed to submit application: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToUserProfile(JobPost job) {
+    if (job.user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewUserProfileScreen(
+            userId: job.user!.id,
+            userName: job.user!.name,
+            userEmail: job.user!.email,
+          ),
+        ),
+      );
+    } else if (job.userId.isNotEmpty) {
+      // Try to parse userId as int
+      final userId = int.tryParse(job.userId);
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewUserProfileScreen(
+              userId: userId,
+              userName: job.userId,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToUserProfileReviews(JobPost job) {
+    if (job.user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewUserProfileScreen(
+            userId: job.user!.id,
+            userName: job.user!.name,
+            userEmail: job.user!.email,
+            initialTabIndex: 1, // Open to Reviews tab
+          ),
+        ),
+      );
+    } else if (job.userId.isNotEmpty) {
+      // Try to parse userId as int
+      final userId = int.tryParse(job.userId);
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewUserProfileScreen(
+              userId: userId,
+              userName: job.userId,
+              initialTabIndex: 1, // Open to Reviews tab
+            ),
           ),
         );
       }

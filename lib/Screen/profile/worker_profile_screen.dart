@@ -189,25 +189,29 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               ),
               const SizedBox(height: 8),
               Center(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    const CircleAvatar(
-                      radius: 48,
-                      backgroundImage: AssetImage(
-                          'assets/images/profile_placeholder.png'), // Placeholder
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.camera_alt,
-                            size: 18, color: Colors.grey),
+                child: SizedBox(
+                  width: 96,
+                  height: 96,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const CircleAvatar(
+                        radius: 48,
+                        backgroundImage: AssetImage(
+                            'assets/images/profile_placeholder.png'), // Placeholder
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.camera_alt,
+                              size: 18, color: Colors.grey),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -350,7 +354,10 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
       readOnly: true,
       decoration: InputDecoration(
         labelText: label,
-        hintText: file != null ? 'File selected' : 'Tap to select file',
+        labelStyle: const TextStyle(
+          color: Colors.black38,
+          fontFamily: 'LifeSavers',
+        ),
         prefixIcon: prefixIconPath != null
             ? Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -371,8 +378,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           borderRadius: BorderRadius.circular(28),
           borderSide: const BorderSide(color: Colors.black),
         ),
-        labelStyle:
-            const TextStyle(color: Colors.black38, fontFamily: 'LifeSavers'),
       ),
       onTap: onTap,
     );

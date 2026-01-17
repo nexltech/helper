@@ -339,10 +339,10 @@ class _AdminProfileEditScreenState extends State<AdminProfileEditScreen> {
           controller: controller,
           maxLines: maxLines,
           decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(
+            labelText: hint,
+            labelStyle: const TextStyle(
+              color: Colors.black38,
               fontFamily: 'LifeSavers',
-              color: Colors.grey,
             ),
             prefixIcon: Icon(icon, color: Colors.black54),
             border: OutlineInputBorder(

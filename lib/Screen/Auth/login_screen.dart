@@ -90,6 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 backgroundColor: Colors.green,
                 duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.fixed,
               ),
             );
             
@@ -137,6 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 content: Text(message),
                 backgroundColor: snackBarColor,
                 duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.fixed,
               ),
             );
             
@@ -158,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
               content: Text(loginResult['message'] ?? 'Your account is not active. Please wait for admin approval.'),
               backgroundColor: Colors.orange,
               duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.fixed,
             ),
           );
           
@@ -187,6 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.fixed,
             ),
           );
         }
@@ -204,6 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.fixed,
           ),
         );
       }

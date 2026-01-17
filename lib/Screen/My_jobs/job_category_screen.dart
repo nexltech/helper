@@ -99,7 +99,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -154,7 +154,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
             color: isSelected ? Colors.grey[100] : Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(25),
             border: Border.all(
               color: isSelected ? Colors.black : Colors.black26,
               width: isSelected ? 2 : 1,
@@ -162,10 +162,18 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           ),
           child: Row(
             children: [
-              Icon(
-                category['icon'],
-                color: category['color'],
-                size: 24,
+              Image.asset(
+                _getCategoryIconPath(category['name']),
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    category['icon'],
+                    color: category['color'],
+                    size: 24,
+                  );
+                },
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -200,7 +208,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: _selectedCategory != null ? Colors.white : Colors.grey[300],
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(25),
             side: BorderSide(
               color: _selectedCategory != null ? Colors.black : Colors.grey,
               width: 1,
@@ -225,6 +233,25 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
   void _handleContinue() {
     if (_selectedCategory != null) {
       Navigator.of(context).pop(_selectedCategory);
+    }
+  }
+
+  String _getCategoryIconPath(String categoryName) {
+    switch (categoryName) {
+      case 'Home Services':
+        return 'assets/Icons/home services.png';
+      case 'Family & Personal Care':
+        return 'assets/Icons/Family.png';
+      case 'Lifestyle & Events':
+        return 'assets/Icons/lifestyle.png';
+      case 'Business Support':
+        return 'assets/Icons/business support.png';
+      case 'Vehicle Services':
+        return 'assets/Icons/vehicle service.png';
+      case 'Other':
+        return 'assets/Icons/others.png';
+      default:
+        return '';
     }
   }
 }

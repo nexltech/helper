@@ -333,30 +333,47 @@ class _AdminProfileViewScreenState extends State<AdminProfileViewScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          backgroundColor: Colors.white,
           title: const Text(
-            'Logout',
+            'Log Out',
             style: TextStyle(
-              fontFamily: 'LifeSavers',
+              fontFamily: 'HomemadeApple',
+              fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
           content: const Text(
-            'Are you sure you want to logout?',
+            'Are you sure you want to log out?',
             style: TextStyle(
               fontFamily: 'LifeSavers',
+              fontSize: 16,
+              color: Colors.black87,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  side: const BorderSide(color: Colors.black26, width: 1),
+                ),
+              ),
               child: const Text(
                 'Cancel',
                 style: TextStyle(
                   fontFamily: 'LifeSavers',
-                  color: Colors.grey,
+                  fontSize: 16,
+                  color: Colors.black87,
                 ),
               ),
             ),
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -364,12 +381,19 @@ class _AdminProfileViewScreenState extends State<AdminProfileViewScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                elevation: 0,
               ),
               child: const Text(
-                'Logout',
+                'Log Out',
                 style: TextStyle(
                   fontFamily: 'LifeSavers',
+                  fontSize: 16,
                   color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

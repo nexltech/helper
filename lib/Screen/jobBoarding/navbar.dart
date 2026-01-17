@@ -9,8 +9,28 @@ import 'package:job/Screen/Chat/chat_list_screen.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/chat_provider.dart';
 
-class BottomNavBar extends StatelessWidget {
+class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
+
+  @override
+  State<BottomNavBar> createState() => _BottomNavBarState();
+}
+
+class _BottomNavBarState extends State<BottomNavBar> {
+  // Helper to get current screen type
+  Type? _getCurrentScreenType() {
+    final route = ModalRoute.of(context);
+    if (route is MaterialPageRoute) {
+      try {
+        final widget = route.builder(context);
+        return widget.runtimeType;
+      } catch (e) {
+        // If we can't build the widget, return null
+        return null;
+      }
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +38,15 @@ class BottomNavBar extends StatelessWidget {
       builder: (context, userProvider, child) {
         final user = userProvider.user;
         final isAdmin = user?.role == 'admin';
+        
+        // Determine current screen to show active state
+        final currentScreen = _getCurrentScreenType();
+        final dashboardType = isAdmin ? AdminDashboardScreen : MyJobsScreen;
+        final profileType = isAdmin ? AdminMyAccountScreen : HireHelpProfileScreen;
+        final isDashboardActive = currentScreen != null && currentScreen == dashboardType;
+        final isJobsActive = currentScreen != null && currentScreen == JobBoardMainScreen;
+        final isMessagesActive = currentScreen != null && currentScreen == ChatListScreen;
+        final isProfileActive = currentScreen != null && currentScreen == profileType;
         
         return BottomAppBar(
           shape: const CircularNotchedRectangle(),
@@ -39,10 +68,12 @@ class BottomNavBar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // First navigation button - role-specific dashboard
-                      _buildNavItem(
-                        icon: Icons.admin_panel_settings,
+                      _buildNavItemWithIcon(
+                        iconPath: isDashboardActive 
+                            ? 'assets/Icons/1st Job Seeker active state.png'
+                            : 'assets/Icons/1st Job Seeker inactive state.png',
                         label: isAdmin ? 'Admin' : 'Dashboard',
-                        color: isAdmin ? Colors.red : Colors.blue,
+                        isActive: isDashboardActive,
                         onTap: () {
                           if (isAdmin) {
                             Navigator.pushReplacement(
@@ -62,10 +93,12 @@ class BottomNavBar extends StatelessWidget {
                         },
                       ),
                       // Second navigation button - Job Board/Reports (role-based)
-                      _buildNavItem(
-                        icon: isAdmin ? Icons.assessment : Icons.work_outline,
+                      _buildNavItemWithIcon(
+                        iconPath: isJobsActive 
+                            ? 'assets/Icons/2nd Test Passed active state.png'
+                            : 'assets/Icons/2nd Test Passed inactive state.png',
                         label: isAdmin ? 'Reports' : 'Jobs',
-                        color: Colors.green,
+                        isActive: isJobsActive,
                         onTap: () {
                           if (isAdmin) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -94,10 +127,12 @@ class BottomNavBar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // Messages
-                      _buildNavItem(
-                        icon: Icons.message_outlined,
+                      _buildNavItemWithIcon(
+                        iconPath: isMessagesActive 
+                            ? 'assets/Icons/3rd Speech Bubble active state.png.png'
+                            : 'assets/Icons/3rd Speech Bubble inactive state.png',
                         label: 'Messages',
-                        color: Colors.purple,
+                        isActive: isMessagesActive,
                         onTap: () {
                           if (isAdmin) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -125,8 +160,12 @@ class BottomNavBar extends StatelessWidget {
                         },
                       ),
                       // Profile with role indicator
-                      _buildProfileNavItem(
+                      _buildProfileNavItemWithIcon(
+                        iconPath: isProfileActive 
+                            ? 'assets/Icons/4th Test Account active state.png'
+                            : 'assets/Icons/4th Test Account inactive state.png',
                         isAdmin: isAdmin,
+                        isActive: isProfileActive,
                         onTap: () {
                           if (isAdmin) {
                             Navigator.push(
@@ -157,10 +196,10 @@ class BottomNavBar extends StatelessWidget {
   }
 
 
-  Widget _buildNavItem({
-    required IconData icon,
+  Widget _buildNavItemWithIcon({
+    required String iconPath,
     required String label,
-    required Color color,
+    required bool isActive,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -171,32 +210,43 @@ class BottomNavBar extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.08),
+            color: isActive ? Colors.blue.withOpacity(0.08) : Colors.grey.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: color.withOpacity(0.2),
-              width: 1.5,
+              color: isActive ? Colors.blue.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+              width: isActive ? 2 : 1,
             ),
-            boxShadow: [
+            boxShadow: isActive ? [
               BoxShadow(
-                color: color.withOpacity(0.1),
-                blurRadius: 4,
+                color: Colors.blue.withOpacity(0.15),
+                blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
-            ],
+            ] : [],
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20,
+          child: Image.asset(
+            iconPath,
+            width: 24,
+            height: 24,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback to default icon if asset not found
+              return Icon(
+                Icons.error_outline,
+                color: Colors.grey,
+                size: 20,
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileNavItem({
+  Widget _buildProfileNavItemWithIcon({
+    required String iconPath,
     required bool isAdmin,
+    required bool isActive,
     required VoidCallback onTap,
   }) {
     final color = isAdmin ? Colors.red : Colors.blue;
@@ -210,57 +260,67 @@ class BottomNavBar extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.08),
+                color: isActive ? color.withOpacity(0.08) : Colors.grey.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: color.withOpacity(0.2),
-                  width: 1.5,
+                  color: isActive ? color.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+                  width: isActive ? 2 : 1,
                 ),
-                boxShadow: [
+                boxShadow: isActive ? [
                   BoxShadow(
-                    color: color.withOpacity(0.1),
-                    blurRadius: 4,
+                    color: color.withOpacity(0.15),
+                    blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
-                ],
+                ] : [],
               ),
-              child: Icon(
-                Icons.person,
-                color: color,
-                size: 20,
+              child: Image.asset(
+                iconPath,
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback to default icon if asset not found
+                  return Icon(
+                    Icons.person,
+                    color: color,
+                    size: 20,
+                  );
+                },
               ),
             ),
-            // Role indicator badge
-            Positioned(
-              right: -2,
-              top: -2,
-              child: Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 2,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    isAdmin ? 'A' : 'U',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
+            // Role indicator badge (only show when active)
+            if (isActive)
+              Positioned(
+                right: -2,
+                top: -2,
+                child: Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      isAdmin ? 'A' : 'U',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

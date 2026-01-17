@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/applicant_model.dart';
 import '../models/my_application_model.dart';
 
@@ -12,10 +13,46 @@ class CrudJobApiService {
     _authToken = token;
   }
 
-  Map<String, String> _getHeaders({String contentType = 'application/json', bool includeBody = true}) {
-    final headers = {
+  // Get auth token from SharedPreferences if not set
+  Future<String?> _getAuthToken() async {
+    print('_getAuthToken: Checking _authToken field...');
+    if (_authToken != null && _authToken!.isNotEmpty) {
+      print('_getAuthToken: Using existing _authToken (length: ${_authToken!.length})');
+      return _authToken;
+    }
+    
+    print('_getAuthToken: _authToken not set, checking SharedPreferences...');
+    // Try to get from SharedPreferences
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? prefs.getString('auth_token');
+      print('_getAuthToken: Token from prefs: ${token != null ? (token.isNotEmpty ? "Found (length: ${token.length})" : "Empty string") : "NULL"}');
+      
+      if (token != null && token.isNotEmpty) {
+        _authToken = token;
+        print('_getAuthToken: Token set to _authToken field');
+        return token;
+      } else {
+        print('_getAuthToken: WARNING - No token found in SharedPreferences!');
+      }
+    } catch (e) {
+      print('_getAuthToken: Error getting token from SharedPreferences: $e');
+    }
+    
+    print('_getAuthToken: Returning null/empty token');
+    return _authToken;
+  }
+
+  Future<Map<String, String>> _getHeaders({String contentType = 'application/json', bool includeBody = true}) async {
+    final token = await _getAuthToken();
+    
+    if (token == null || token.isEmpty) {
+      throw Exception('Auth token not set. Please log in again.');
+    }
+    
+    final headers = <String, String>{
       'Accept': 'application/json',
-      'Authorization': 'Bearer $_authToken',
+      'Authorization': 'Bearer $token',
     };
     
     if (includeBody) {
@@ -35,8 +72,9 @@ class CrudJobApiService {
     required String jobDescription,
     String? image,
   }) async {
-    if (_authToken == null) {
-      throw Exception('Auth token not set');
+    final token = await _getAuthToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Auth token not set. Please log in again.');
     }
 
     try {
@@ -74,9 +112,10 @@ class CrudJobApiService {
         print('Sending request to: $baseUrl/job-post');
         print('Request body: $requestBody');
 
+        final headers = await _getHeaders();
         final response = await http.post(
           Uri.parse('$baseUrl/job-post'),
-          headers: _getHeaders(),
+          headers: headers,
           body: json.encode(requestBody),
         );
 
@@ -125,13 +164,31 @@ class CrudJobApiService {
     required File imageFile,
   }) async {
     try {
+      // Get token first and verify
+      final token = await _getAuthToken();
+      print('=== MULTIPART REQUEST DEBUG ===');
+      print('Token retrieved: ${token != null ? "${token.substring(0, token.length > 10 ? 10 : token.length)}..." : "NULL"}');
+      
+      if (token == null || token.isEmpty) {
+        throw Exception('Auth token not set. Please log in again.');
+      }
+      
       var request = http.MultipartRequest(
         'POST',
         Uri.parse('$baseUrl/job-post'),
       );
 
       // Add headers
-      request.headers.addAll(_getHeaders(contentType: 'multipart/form-data', includeBody: false));
+      final headers = await _getHeaders(contentType: 'multipart/form-data', includeBody: false);
+      print('Headers being added: ${headers.keys}');
+      print('Authorization header present: ${headers.containsKey('Authorization')}');
+      if (headers.containsKey('Authorization')) {
+        print('Authorization value: ${headers['Authorization']?.substring(0, headers['Authorization']!.length > 30 ? 30 : headers['Authorization']!.length)}...');
+      }
+      request.headers.addAll(headers);
+      print('Request headers after adding: ${request.headers.keys}');
+      print('Request Authorization: ${request.headers['Authorization']?.substring(0, request.headers['Authorization']!.length > 30 ? 30 : request.headers['Authorization']!.length)}...');
+      print('==============================');
 
       // Add text fields
       request.fields['job_title'] = jobTitle;
@@ -151,6 +208,10 @@ class CrudJobApiService {
       ));
 
       print('Sending multipart request to: $baseUrl/job-post');
+      print('Request URL: ${request.url}');
+      print('Request Method: ${request.method}');
+      print('Request Headers: ${request.headers}');
+      print('Authorization Header: ${request.headers['Authorization'] ?? "MISSING!"}');
       print('Fields: ${request.fields}');
       print('Files: ${request.files.length}');
 
@@ -215,9 +276,10 @@ class CrudJobApiService {
       if (jobDescription != null) body['job_description'] = jobDescription;
       if (image != null && image.isNotEmpty) body['image'] = image;
 
+      final headers = await _getHeaders();
       final response = await http.patch(
         Uri.parse('$baseUrl/job-post/$jobId'),
-        headers: _getHeaders(),
+        headers: headers,
         body: json.encode(body),
       );
 
@@ -238,9 +300,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders();
       final response = await http.delete(
         Uri.parse('$baseUrl/job-post/$jobId'),
-        headers: _getHeaders(),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -260,9 +323,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.get(
         Uri.parse('$baseUrl/job-posts'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -283,9 +347,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.get(
         Uri.parse('$baseUrl/job-post/$jobId'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -306,9 +371,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.get(
         Uri.parse('$baseUrl/jobs/$jobId/applications'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       print('Get Job Applicants Response status: ${response.statusCode}');
@@ -332,9 +398,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.post(
         Uri.parse('$baseUrl/applications/$applicationId/accept'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       print('Accept Application Response status: ${response.statusCode}');
@@ -357,9 +424,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.post(
         Uri.parse('$baseUrl/applications/$applicationId/cancel'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       print('Cancel Application Response status: ${response.statusCode}');
@@ -382,9 +450,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.post(
         Uri.parse('$baseUrl/applications/$applicationId/start'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       print('Start Application Response status: ${response.statusCode}');
@@ -407,9 +476,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.get(
         Uri.parse('$baseUrl/my-applications'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       print('Get My Applications Response status: ${response.statusCode}');
@@ -432,8 +502,9 @@ class CrudJobApiService {
     required String coverLetter,
     required List<String> availability,
   }) async {
-    if (_authToken == null) {
-      throw Exception('Auth token not set');
+    final token = await _getAuthToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Auth token not set. Please log in again.');
     }
 
     print('=== APPLY FOR JOB API DEBUG ===');
@@ -451,12 +522,10 @@ class CrudJobApiService {
       
       print('Request Body: ${json.encode(requestBody)}');
 
+      final headers = await _getHeaders();
       final response = await http.post(
         Uri.parse('$baseUrl/jobs/$jobId/apply'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_authToken',
-        },
+        headers: headers,
         body: json.encode(requestBody),
       );
 
@@ -498,9 +567,10 @@ class CrudJobApiService {
     }
 
     try {
+      final headers = await _getHeaders(includeBody: false);
       final response = await http.get(
         Uri.parse('$baseUrl/jobs/active'),
-        headers: _getHeaders(includeBody: false),
+        headers: headers,
       );
 
       print('Get Active Jobs Response status: ${response.statusCode}');

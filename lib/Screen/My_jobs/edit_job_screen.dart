@@ -142,7 +142,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
               controller: _jobTitleController,
               icon: Icons.assignment,
               iconColor: Colors.orange,
-              hintText: 'Enter job title',
+              labelText: 'Enter job title',
             ),
             const SizedBox(height: 16),
             
@@ -156,7 +156,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
               controller: _paymentController,
               icon: Icons.account_balance_wallet,
               iconColor: Colors.blue,
-              hintText: 'Enter payment amount',
+              labelText: 'Enter payment amount',
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
@@ -167,7 +167,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
               controller: _addressController,
               icon: Icons.location_on,
               iconColor: Colors.red,
-              hintText: 'Enter job location',
+              labelText: 'Enter job location',
             ),
             const SizedBox(height: 16),
             
@@ -177,7 +177,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
               controller: _dateTimeController,
               icon: Icons.calendar_today,
               iconColor: Colors.green,
-              hintText: 'Select date and time',
+              labelText: 'Select date and time',
               readOnly: true,
               onTap: () => _selectDateTime(),
             ),
@@ -189,7 +189,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
               controller: _descriptionController,
               icon: Icons.edit,
               iconColor: Colors.purple,
-              hintText: 'Describe the job details',
+              labelText: 'Describe the job details',
               maxLines: 3,
             ),
             const SizedBox(height: 16),
@@ -207,7 +207,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
     required TextEditingController controller,
     required IconData icon,
     required Color iconColor,
-    required String hintText,
+    required String labelText,
     TextInputType? keyboardType,
     bool readOnly = false,
     int maxLines = 1,
@@ -238,10 +238,10 @@ class _EditJobScreenState extends State<EditJobScreen> {
             maxLines: maxLines,
             onTap: onTap,
             decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: const TextStyle(
+              labelText: labelText,
+              labelStyle: const TextStyle(
+                color: Colors.black38,
                 fontFamily: 'LifeSavers',
-                color: Colors.black26,
               ),
               border: InputBorder.none,
               prefixIcon: Padding(

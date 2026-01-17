@@ -139,7 +139,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         ),
                         child: Center(
                           child: Image.asset(
-                            'assets/Icons/Bell.png',
+                            'assets/Icons/Alarm.png',
                             width: 28,
                             height: 28,
                             fit: BoxFit.contain,
@@ -198,10 +198,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       fontSize: 16,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Search',
-                      hintStyle: const TextStyle(
+                      labelText: 'Search',
+                      labelStyle: const TextStyle(
+                        color: Colors.black38,
                         fontFamily: 'LifeSavers',
-                        color: Colors.black26,
                       ),
                       border: InputBorder.none,
                       prefixIcon: Padding(
@@ -344,7 +344,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           },
           backgroundColor: Colors.white,
           elevation: 0,
-          child: const Icon(Icons.add, color: Colors.green, size: 40),
+          child: Image.asset(
+            'assets/Icons/Plus Math.png',
+            width: 40,
+            height: 40,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.add, color: Colors.green, size: 40);
+            },
+          ),
         ),
       ),
     );
@@ -941,8 +949,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               TextField(
                 controller: commentController,
                 decoration: const InputDecoration(
-                  labelText: 'Comment',
-                  hintText: 'Enter your comment...',
+                  labelText: 'Enter your comment...',
+                  labelStyle: TextStyle(
+                    color: Colors.black38,
+                    fontFamily: 'LifeSavers',
+                  ),
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -1009,8 +1020,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               TextField(
                 controller: commentController,
                 decoration: const InputDecoration(
-                  labelText: 'Comment',
-                  hintText: 'Enter your comment...',
+                  labelText: 'Enter your comment...',
+                  labelStyle: TextStyle(
+                    color: Colors.black38,
+                    fontFamily: 'LifeSavers',
+                  ),
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -1068,8 +1082,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               TextField(
                 controller: commentController,
                 decoration: const InputDecoration(
-                  labelText: 'Reason',
-                  hintText: 'Enter reason for suspension...',
+                  labelText: 'Enter reason for suspension...',
+                  labelStyle: TextStyle(
+                    color: Colors.black38,
+                    fontFamily: 'LifeSavers',
+                  ),
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -1127,8 +1144,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               TextField(
                 controller: commentController,
                 decoration: const InputDecoration(
-                  labelText: 'Reason',
-                  hintText: 'Enter reason for reactivation...',
+                  labelText: 'Enter reason for reactivation...',
+                  labelStyle: TextStyle(
+                    color: Colors.black38,
+                    fontFamily: 'LifeSavers',
+                  ),
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,

@@ -132,11 +132,18 @@ class ChatApiService {
       print('ChatApiService: Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        return GetChatsResponse.fromJson(responseData);
+        try {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          return GetChatsResponse.fromJson(responseData);
+        } catch (parseError) {
+          print('ChatApiService: JSON parsing error: $parseError');
+          print('ChatApiService: Response body: ${response.body}');
+          throw Exception('Failed to parse chat data: $parseError');
+        }
       } else {
         final errorMessage = 'Failed to get chats: ${response.statusCode}';
         print('ChatApiService: $errorMessage');
+        print('ChatApiService: Response body: ${response.body}');
         throw Exception(errorMessage);
       }
     } catch (e) {
@@ -172,11 +179,18 @@ class ChatApiService {
       print('ChatApiService: Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        return GetChatMessagesResponse.fromJson(responseData);
+        try {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          return GetChatMessagesResponse.fromJson(responseData);
+        } catch (parseError) {
+          print('ChatApiService: JSON parsing error: $parseError');
+          print('ChatApiService: Response body: ${response.body}');
+          throw Exception('Failed to parse chat messages: $parseError');
+        }
       } else {
         final errorMessage = 'Failed to get chat messages: ${response.statusCode}';
         print('ChatApiService: $errorMessage');
+        print('ChatApiService: Response body: ${response.body}');
         throw Exception(errorMessage);
       }
     } catch (e) {

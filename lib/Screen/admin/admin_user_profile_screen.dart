@@ -517,8 +517,11 @@ class _AdminUserProfileScreenState extends State<AdminUserProfileScreen> {
               TextField(
                 controller: commentController,
                 decoration: const InputDecoration(
-                  labelText: 'Comment',
-                  hintText: 'Enter your comment...',
+                  labelText: 'Enter your comment...',
+                  labelStyle: TextStyle(
+                    color: Colors.black38,
+                    fontFamily: 'LifeSavers',
+                  ),
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -578,10 +581,13 @@ class _AdminUserProfileScreenState extends State<AdminUserProfileScreen> {
               TextField(
                 controller: commentController,
                 decoration: InputDecoration(
-                  labelText: 'Reason',
-                  hintText: isSuspend 
+                  labelText: isSuspend 
                     ? 'Enter reason for suspension...' 
                     : 'Enter reason for reactivation...',
+                  labelStyle: const TextStyle(
+                    color: Colors.black38,
+                    fontFamily: 'LifeSavers',
+                  ),
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,

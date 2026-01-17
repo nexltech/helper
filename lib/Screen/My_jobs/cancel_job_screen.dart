@@ -95,7 +95,6 @@ class _CancelJobScreenState extends State<CancelJobScreen> {
                           style: const TextStyle(fontSize: 14),
                           decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: '',
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 8),
                           ),

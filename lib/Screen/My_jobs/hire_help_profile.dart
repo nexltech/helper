@@ -5,8 +5,13 @@ import '../../providers/user_provider.dart';
 import '../../providers/review_provider.dart';
 import '../profile/change_email_screen.dart';
 import '../profile/change_password_screen.dart';
+import '../profile/user_profile_screen.dart';
 import 'package:job/Screen/jobBoarding/navbar.dart';
+import 'package:job/Screen/jobBoarding/job_board_main_screen.dart';
 import 'package:job/Screen/My_jobs/job_post_screen.dart';
+import 'package:job/Screen/notifications/notifications_screen.dart';
+import 'package:job/Screen/schedule/my_schedule_screen.dart';
+import 'package:job/Screen/payment/payment_setup_screen.dart';
 import 'package:job/Screen/legal/privacy_policy_screen.dart';
 import 'package:job/Screen/legal/terms_of_service_screen.dart';
 import 'package:job/Screen/legal/security_data_protection_screen.dart';
@@ -95,7 +100,15 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
           },
           backgroundColor: const Color(0xFFDDF8E5),
           elevation: 0,
-          child: const Icon(Icons.add, color: Colors.green, size: 48),
+          child: Image.asset(
+            'assets/Icons/Plus Math.png',
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.add, color: Colors.green, size: 48);
+            },
+          ),
         ),
       ),
     );
@@ -167,21 +180,31 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
                   ],
                 ),
               ),
-              // Notification Bell
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.green),
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Center(
-                  child: Image.asset(
-                    'assets/Icons/Bell.png',
-                    width: 24,
-                    height: 24,
-                    fit: BoxFit.contain,
+              // Notification Bell - Clickable
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.green),
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/Icons/Alarm.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
@@ -227,10 +250,10 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
                   Icons.work_outline,
                   Colors.brown,
                   () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Job Board - Coming Soon'),
-                        backgroundColor: Colors.brown,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const JobBoardMainScreen(),
                       ),
                     );
                   },
@@ -243,10 +266,10 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
                   Icons.calendar_today,
                   Colors.blue,
                   () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Schedule Management - Coming Soon'),
-                        backgroundColor: Colors.blue,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyScheduleScreen(),
                       ),
                     );
                   },
@@ -259,10 +282,12 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
                   Icons.star_outline,
                   Colors.amber,
                   () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Reviews Management - Coming Soon'),
-                        backgroundColor: Colors.amber,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const UserProfileScreen(
+                          initialTabIndex: 1, // Open to Reviews tab
+                        ),
                       ),
                     );
                   },
@@ -464,10 +489,10 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
           ),
           GestureDetector(
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Payment Setup - Coming Soon'),
-                  backgroundColor: Colors.blue,
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PaymentSetupScreen(),
                 ),
               );
             },
@@ -507,11 +532,20 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
             ),
             child: Stack(
               children: [
-                const Center(
-                  child: Icon(
-                    Icons.notifications,
+                Center(
+                  child: Image.asset(
+                    'assets/Icons/Alarm.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
                     color: Colors.green,
-                    size: 20,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.notifications,
+                        color: Colors.green,
+                        size: 20,
+                      );
+                    },
                   ),
                 ),
                 Positioned(
@@ -543,10 +577,10 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
           ),
           GestureDetector(
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Notifications - Coming Soon'),
-                  backgroundColor: Colors.blue,
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationsScreen(),
                 ),
               );
             },
@@ -784,30 +818,47 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          backgroundColor: Colors.white,
           title: const Text(
-            'Logout',
+            'Log Out',
             style: TextStyle(
-              fontFamily: 'LifeSavers',
+              fontFamily: 'HomemadeApple',
+              fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
           content: const Text(
-            'Are you sure you want to logout?',
+            'Are you sure you want to log out?',
             style: TextStyle(
               fontFamily: 'LifeSavers',
+              fontSize: 16,
+              color: Colors.black87,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  side: const BorderSide(color: Colors.black26, width: 1),
+                ),
+              ),
               child: const Text(
                 'Cancel',
                 style: TextStyle(
                   fontFamily: 'LifeSavers',
-                  color: Colors.grey,
+                  fontSize: 16,
+                  color: Colors.black87,
                 ),
               ),
             ),
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -815,12 +866,19 @@ class _HireHelpProfileScreenState extends State<HireHelpProfileScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                elevation: 0,
               ),
               child: const Text(
-                'Logout',
+                'Log Out',
                 style: TextStyle(
                   fontFamily: 'LifeSavers',
+                  fontSize: 16,
                   color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
